@@ -1,0 +1,81 @@
+*     EOS#     string for EOS name        Hugoniot initial      input format
+*                                      temperature  density     
+ANEOS1 -1  'BASALT WITH MOLECULES'  THUG=-1   RHUG=-1     LONG
+*
+*      nelem  type   rho0  temp0(K)  press0  B0/-Cbulk  Grun Tdebye(K)
+ANEOS2   8      4    2.86   298.      1.e6     -5.E5    1.39   -1056.
+*
+*                                   Critical Pt. Adj  Thermal Conduction
+*         S    3*C24   Evap   Tmelt(K)    C53   C54         H0    C41
+ANEOS3   1.62   2.      1.1E11    1393.      0.    0.         0.     0.
+*
+*                 Solid-solid phase transition data
+*       rhomin    D1     D2     D3      D4      D5    Hfusion  -rholiq
+ANEOS4   0.      3.9     4.    2.E11  1.4E12  0.8E12     0.       0.
+*
+*     Cold comp. limits     Liquid EOS params       Interpolation params
+*       Up        L0      alpha    beta    gamma     C60     C61    C62
+ANEOS5  0.        0.       0.      0.       0.        0.     0.      0.4
+*
+*   Ionization model    Reactive chemistry   ...............Molecular Clusters...............
+*       Ionflag         Eshift     Sshift      Atoms  Ebind(eV)   RotDOF    Rbond   VibDOF  
+ANEOS6     0              0.        0.           2      6.        2.0       1.5E-8      1
+*
+*      ..............    Pcold/Expanded      Variables for future expansion
+*       Theta_vib(K)     LJflag  a_exp
+ANEOS7      2000.          1      1.7          0       0       0     0      0    
+*
+*    Elements in material (number must = nelem)
+*        Z   Atomic Fraction
+ANEOS8    8      0.596
+ANEOS9   14      0.168
+ANEOS10  13      0.061
+ANEOS11  20      0.0575
+ANEOS12  26      0.0525
+ANEOS13  12      0.0375
+ANEOS14  11      0.0173
+ANEOS15  22      0.0053
+*
+*****   END of input for ANEOS
+* Pierazzo et al. (2005), Starting conditions for hydrothermal systems underneath Martian craters: Hydrocode modeling,
+* 	   GSA Special Paper 384, p443--459.
+*         -- Note: Evap = 1.1E11 erg/g (c.f. 1.1E7 J/g in paper)
+*                 D3   = 5E10   (units for this are dyne/cm2 not GPa as in paper)
+*                 RotDOF, VibDOF, Rbond = 0. (I assume this has the same effect as Rbond = IntDOF = 0 in old ANEOS)
+*         -- The solid-solid phase transition at 5 GPa as prescibed here seems to cause strange artefacts in simulations,
+*            so I am changing the transition to 20 GPa (and 3.9 g/cc) for now (GSC, 02/2013)
+*
+*   Note:  Lines must not be longer than 120 characters
+*
+*   Explanation of new input parameters for molecular clusters:
+*
+*   There are 8 new input parameters that appear on line ANEOS6 and ANEOS7 in the space
+*   Sam Thompson originally alloted for extensions.  You must use the LONG 
+*   input format to access this new data.
+*
+*
+*   Atoms is the number of atoms in the molecular cluster.  If Atoms = 0 or 1
+*          no molecular clusters are added.  The current code can treat both
+*          Atoms = 2 (diatomic) or Atoms = 3 (triatomic) clusters.
+*
+*   Ebind is the binding energy of the molecules in eV.
+*
+*   RotDOF is the number of rotational degrees of freedom in the molecule.  It is 2 for.
+*          a diatomic molecule.  Larger values increase the heat capacity of the molecular gas.
+*
+*   Rbond is the bond length of the clusters in cm.  This is needed to compute
+*         the moment of inertia (hence rotational energy level spacing) of the molecules.
+*
+*   VibDOF is the number of vibrational degrees of freedom.  It is 1 for diatomic molecules,
+*          but larger values apply to polyatomic molecules.
+*
+*  Theta_vib is the effective "debye" temperature of the molecule.  k * Theta_vib is the average
+*          spacing of vibrational energy levels.
+*
+*   flag = 0 uses the standard ANEOS cold pressure equation of state.
+*        = 1 substitues a Lennard-Jones cold potential for Pc when eta < 1.
+*
+*   Pc exp is the exponent of the density ratio in the Lennard-Jones potential
+*          for expanded states only. It has no effect on the compressed pressure.
+*          use this parameter to move the critical point.
+

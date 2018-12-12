@@ -1,0 +1,146 @@
+C
+C
+      SUBROUTINE ANPHTR (C,TGAM)
+C
+C***********************************************************************
+C
+C     ANEOS PACKAGE   MODIFIES THE ZERO-TEMPERATURE ISOTHERM OF THE
+C     ANALYTICAL EOS FOR A TEMPERATURE INDEPENDENT PHASE TRANSITION
+C
+C************************************** 8/87 version slt ***************
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      COMMON /FILEOS/ KLST, KINP
+      SAVE   /FILEOS/
+C
+      DIMENSION C(54)
+      PARAMETER (ZERO=0.D0)
+      PARAMETER (ONE=1.D0)
+      PARAMETER (TWO=2.D0)
+      PARAMETER (THREE=3.D0)
+      PARAMETER (FOUR=4.D0)
+      PARAMETER (FIVE=5.D0)
+      PARAMETER (SIX=6.D0)
+      PARAMETER (SEVEN=7.D0)
+      PARAMETER (CNINE=9.D0)
+      PARAMETER (TEN=10.D0)
+      PARAMETER (HALF=0.5D0)
+      PARAMETER (QCP1=25.D0)
+      PARAMETER (QCP2=15.D0)
+      PARAMETER (QCP3=1.D-4)
+      PARAMETER (QCP4=1.D-7)
+      PARAMETER (QCP5=1.5D0)
+      PARAMETER (QCP6=1.D-3)
+      PARAMETER (ATHIRD=1.D0/3.D0)
+C
+      IF (C(30).EQ.TWO) GO TO 175
+      IF (C(1).GT.C(19)) GO TO 20
+   10 C(1)=1.D100
+      C(40)=ZERO
+      C(39)=ZERO
+      C(38)=ZERO
+      C(9)=ZERO
+      C(8)=ZERO
+      C(7)=ZERO
+      C(2)=ZERO
+      GO TO 175
+   20 S3=C(15)+TGAM/THREE
+      R1=S3-QCP1
+      R2=S3+QCP1
+      S4=EXP(-C(33))*C(32)
+      S5=(QCP2+SEVEN*C(33)+C(33)**2)*S4
+      S6=(TEN+FOUR*C(33)+HALF*C(33)**2)*S4
+      S4=(SIX+THREE*C(33)+HALF*C(33)**2)*S4
+      ETA1=C(1)/C(19)
+      S7=ETA1**ATHIRD
+      S8=C(32)*ETA1*S7**2*EXP(-C(33)/S7)
+   30 C34=S4-CNINE*S3*C(3)
+      C35=THREE*C(3)*(SIX*S3+ONE)-S5
+      C36=S6-THREE*C(3)*(THREE*S3+ONE)
+      PTR=S8-(C34+C35*S7+C36*S7**2)
+      IF (C(7).EQ.ZERO) GO TO 70
+      IF (ABS(PTR-C(7)).LE.QCP3*(PTR+C(7))) GO TO 70
+      IF (R2-R1.LT.QCP4) GO TO 70
+      IF (PTR-C(7)) 50,70,40
+   40 R2=S3
+      GO TO 60
+   50 R1=S3
+   60 S3=HALF*(R1+R2)
+      GO TO 30
+   70 IF (C(2).LT.C(1)) C(2)=C(1)
+      ETA2=C(2)/C(19)
+      C37=C(37)-C(34)+C34-QCP5*(C(35)-C35)-THREE*(C(36)-C36)
+      S1=C(33)/S7
+      S2=EXP(-S1)
+      CALL ANEI3 (S1,S2,S4)
+      C8=(THREE*C(32)*S4*S7**2+C34/ETA1+QCP5*C35*S7/ETA1+
+     1    THREE*C36/S7-C37)/C(19)
+      DP1=C(32)*S7*(FIVE*S7+C(33))*EXP(-C(33)/S7)/THREE-
+     1    (C35/S7+TWO*C36)/(THREE*S7)
+      DP2=C(32)*((TEN+SIX*C(33)/S7)/S7+C(33)**2/ETA1)*
+     1    EXP(-C(33)/S7)/CNINE+TWO*(C35/S7+C36)/(CNINE*ETA1*S7)
+      IF (C(39)) 80,90,100
+   80 DP3=-DP1*C(39)
+      GO TO 110
+   90 DP3=DP1*ETA2/ETA1
+      GO TO 110
+  100 DP3=C(39)
+  110 IF (C(40)) 120,130,140
+  120 DP4=-DP2*C(40)
+      GO TO 150
+  130 DP4=DP2*(ETA2/ETA1)**2
+      GO TO 150
+  140 DP4=C(40)
+  150 S1=ETA2**ATHIRD
+      S2=EXP(-C(33)/S1)
+      S4=C(32)*S1*(FIVE*S1+C(33))*S2-THREE*DP3
+      S5=CNINE*ETA2*DP4-C(32)*(TEN*S1**2+SIX*C(33)*S1+C(33)**2)*S2
+      C39=S1*S1*(S5-S4)
+      C40=S1*(S4-HALF*S5)
+      C38=C(32)*S1**2*ETA2*S2-PTR-(C39+C40*S1)*S1
+      EN2=C8+PTR*(ETA2-ETA1)/(C(19)*ETA1*ETA2)
+      S4=C(33)/S1
+      CALL ANEI3 (S4,S2,S5)
+      C9=EN2-(THREE*C(32)*S5*S1**2+C38/ETA2+(QCP5*C39/S1+
+     1   THREE*C40)/S1)/C(19)
+      S4=THREE*(S3-C(15))
+      WRITE(KLST,180) PTR,C(7),DP1,DP3,DP2,DP4,C8,EN2,S4,TGAM
+      IF (C(7).GT.ZERO) GO TO 160
+      IF (ETA2.GT.ETA1) GO TO 170
+      IF (C(39).NE.ZERO) GO TO 170
+      IF (C(40).NE.ZERO) GO TO 170
+      CALL ANWARN(0)
+      WRITE(KLST,190)
+      GO TO 10
+  160 IF (ABS(PTR-C(7)).LE.QCP6*(PTR+C(7))) GO TO 170
+      CALL ANWARN(0)
+      WRITE(KLST,200) R1,R2,S3,C(15),TGAM
+  170 CONTINUE
+      WRITE(KLST,210)
+      C(1)=ETA1
+      C(2)=ETA2
+      C(7)=PTR
+      C(8)=C8
+      C(9)=C9
+      C(34)=C34
+      C(35)=C35
+      C(36)=C36
+      C(37)=C37
+      C(38)=C38
+      C(39)=C39
+      C(40)=C40
+C
+  180 FORMAT (/,'  Zero-temperature isotherm has been modified for a'
+     1 ,' solid-solid phase transition',//12H  PCRITICAL=,1PD13.6,10X,
+     1 12HPCTR(INPUT)=
+     2,D13.6,/,15H  DPDETA(ETA1)=,D13.6,7X,13HDPDETA(ETA2)=,D13.6,/, 17H
+     3  D2PDETA2(ETA1)=,D13.6,5X,15HD2PDETA2(ETA2)=,D13.6,/,11H  EC(ETA1
+     4)=,D13.6,11X,9HEC(ETA2)=,D13.6,/,11H  TGAMSTAR=,D13.6,11X,5HTGAM=,
+     5D13.6)
+  190 FORMAT (64H0 ALL DEFAULT OPTIONS WERE USED.  NO TRANSITION WILL BE
+     1 INCLUDED,/,1H1)
+  200 FORMAT (38H0 SOMETHING IS WRONG - CHECK CAREFULLY,/,
+     1 1X,1P5E14.7)
+  210 FORMAT (1X)
+  175 RETURN
+      END

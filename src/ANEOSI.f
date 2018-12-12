@@ -1,0 +1,370 @@
+C
+C
+      SUBROUTINE ANEOSI(KINP,KLST,NEOS,LAB,LIBN,LIBT,RHUG,THUG,CZB,
+     1      ZZS,COT)
+C
+C***********************************************************************
+C
+C     READ INPUT FOR ONE MATERIAL FOR ANEOS PACKAGE IN CSQGEN
+C     BOTH OLD(PRE 1985) AND NEW FORMAT(1985 AND LATER) ANEOS INPUT
+C     CAN BE PROCESSED. NOT VERY EFFICIENT BUT WHAT USERS WANTED.
+C     IS COMPLEX BECAUSE FREE FORM INPUT PACKAGE IS NOT USED LIKE
+C     IN CHARTD, ETC.
+C
+C     ALSO, NEW 40 INPUT VARIABLE FORMAT PROCESSED (OLD WAS 24).
+C
+C     FOR NEW INPUT FORMAT, THIS ROUTINE WILL PROCESS RECORDS WITH
+C     AN * IN COLUMN 1 AS A COMMENT.
+C
+C     INPUTS:
+C
+C     KINP = INPUT FILE NUMBER
+C
+C     KLST = LISTING OUTPUT FILE NUMBER
+C
+C     OUTPUTS:  (A1 = ANEOS INPUT RECORD 1, A3 = ANEOS INPUT RECORD 3)
+C
+C     NEOS = NEOS A1
+C
+C     LAB = TITLE A1
+C
+C     LIBN = LIB A1
+C
+C     LIBT = TYPE A1
+C
+C     RHUG = RHUG A1
+C
+C     THUG = THUG A1
+C
+C     CZB = ARRAY OF NINPUT NUMBERS (OLD A2 TO A4)
+C
+C     ZZS, COT = ARRAY OF NUMBERS ON A5 TO AN
+C
+C************************************** 8/87 version slt ***************
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      PARAMETER(NINPUT=48)  !NINPUT must be a multiple of 8!
+      DIMENSION  CZB(NINPUT), ZZS(10), COT(10)
+      CHARACTER*(*) LAB
+      CHARACTER*120 CW, CWT
+      CHARACTER*8 CNEOS, CLIB, CTYPE
+      CHARACTER*16 CRHUG, CTHUG
+      DATA ISETN /0/
+C
+C     OPEN SCRATCH FILE
+C
+      IRD=87
+      OPEN (IRD,STATUS='scratch')
+      REWIND IRD
+C
+C     PROCESS RECORD 1
+C
+      ISETN=ISETN+1
+      LAB=' '
+      CW=' '
+      NEW=0
+      NREC=3
+      IDMP=KINP
+   10 FORMAT(A)
+   15 CONTINUE
+      READ(KINP,10,ERR=9400,END=9500) CW(1:85)
+      IF((CW(1:1).EQ.'*').OR.(CW.EQ.' ')) GO TO 15
+C
+C     TEST FOR OLD OR NEW FORMAT
+C
+      J1=INDEX(CW,'ANEOS')
+      IF(J1.LE.0) J1=INDEX(CW,'aneos')
+      IF(J1.LE.0) GO TO 500
+      IF(J1.LE.2) GO TO 20
+      J3=J1-1
+      IF(CW(1:J3).NE.' ') GO TO 500
+C
+C     NEW FORMAT ASSUMED
+C
+   20 NEW=1
+      CWT=CW(J1:120)
+      CW=CWT
+      J1=MIN(INDEX(CW,''''),INDEX(CW,' '))
+      IF(J1.GT.0) CW(J1:J1)=' '
+      LAB='NN$$'
+C
+C     LOOK FOR TITLE FIELD IN '
+C
+      J1=INDEX(CW,'''')
+      IF(J1.LE.0) GO TO 45
+        DO 30 I=J1,80
+        J3=I+1
+        IF(CW(J3:J3).NE.'''') GO TO 30
+        J2=I+1
+        GO TO 40
+   30   CONTINUE
+      GO TO 9401
+   40 LAB=' '
+      J3=J1+1
+      J4=J2-1
+      IF(J2.GE.J1+2) LAB=CW(J3:J4)
+      CW(J1:J2)=' '
+C
+C     REMOVE , = AND / FROM STRING
+   45   DO 50 I=1,80
+        M=I
+        IF((CW(M:M).EQ.',').OR.(CW(M:M).EQ.'/').OR.(CW(M:M).EQ.'='))
+     1      CW(M:M)=' '
+   50   CONTINUE
+      J1=INDEX(CW,' ')
+      IF(J1.GT.0) CW(1:J1)=' '
+C
+C     REMOVE CONSECUTIVE BLANKS
+C
+        DO 60 I=1,80
+        J1=INDEX(CW,'  ')
+        IF(J1.LE.0) GO TO 70
+        IF(CW(J1:120).EQ.' ') GO TO 70
+        CWT=CW(J1+2:120)
+   60   CW(J1+1:120)=CWT
+C
+C     NEOS FIELD
+C
+   70   DO 100 I=2,80
+        J1=I
+        IF(CW(J1:J1).NE.' ') GO TO 100
+        GO TO 110
+  100   CONTINUE
+      GO TO 9402
+  110 CNEOS=CW(1:J1)
+      CW(1:J1)=' '
+C
+C     LABEL FIELD NOT IN '
+C
+      IF(LAB.NE.'NN$$') GO TO 200
+      J1=0
+        DO 120 I=1,100
+        J3=I
+        IF((J1.EQ.0).AND.(CW(J3:J3).EQ.' ')) GO TO 120
+        IF(J1.NE.0) GO TO 130
+          IF(CW(J3:J3).NE.' ') J1=I
+          GO TO 120
+  130   IF(CW(J3:J3).NE.' ') GO TO 120
+          J2=I
+          GO TO 150
+  120   CONTINUE
+      LAB=' '
+      GO TO 200
+  150 LAB=CW(J1:J2)
+      CW(J1:J2)=' '
+C
+C     KEYWORD FIELDS
+C
+C     LIB=
+  200 J1=INDEX(CW,'LIB')
+      IF(J1.LE.0) J1=INDEX(CW,'lib')
+      CLIB=' 0 '
+      IF(J1.LE.0) GO TO 220
+        J3=J1+4
+        CWT=CW(J3:120)
+        J2=INDEX(CWT,' ')
+        IF(J2.LE.0) GO TO 220
+        CLIB=CWT(1:J2)
+C
+C     TYPE=
+  220 J1=INDEX(CW,'TYPE')
+      IF(J1.LE.0) J1=INDEX(CW,'type')
+      CTYPE=' 99 '
+      IF(J1.LE.0) GO TO 240
+        J3=J1+5
+        CWT=CW(J3:120)
+        J2=INDEX(CWT,' ')
+        IF(J2.LE.0) GO TO 240
+        CTYPE=CWT(1:J2)
+C
+C     RHUG=
+  240 J1=INDEX(CW,'RHUG')
+      IF(J1.LE.0) J1=INDEX(CW,'rhug')
+      CRHUG=' 0 '
+      IF(J1.LE.0) GO TO 260
+        J3=J1+5
+        CWT=CW(J3:120)
+        J2=INDEX(CWT,' ')
+        IF(J2.LE.0) GO TO 260
+        CRHUG=CWT(1:J2)
+C
+C     THUG=
+  260 J1=INDEX(CW,'THUG')
+      IF(J1.LE.0) J1=INDEX(CW,'thug')
+      CTHUG=' 0 '
+      IF(J1.LE.0) GO TO 270
+        J3=J1+5
+        CWT=CW(J3:120)
+        J2=INDEX(CWT,' ')
+        IF(J2.LE.0) GO TO 270
+        CTHUG=CWT(1:J2)
+C
+C     LONG INPUT - 6/87 extended input
+  270 J1=INDEX(CW,' LONG')
+      IF(J1.LE.0) J1=INDEX(CW,' long')
+      IF(J1.GT.0) THEN
+        NREC=NINPUT/8
+      END IF
+C
+C     HAVE ALL FIELDS
+C
+C     WRITE IN TEMP FILE
+C
+      WRITE(IRD,300) CNEOS,CLIB,CTYPE,CRHUG,CTHUG
+  300 FORMAT(5(1X,A),1H )
+C
+C     READ REFORMATTED FIRST RECORD
+C
+      REWIND IRD
+      READ(IRD,*,ERR=9400,END=9500) NEOS, LIBN, LIBT, RHUG, THUG
+      GO TO 528
+C
+C     READ OLD FORMAT FIRST RECORD
+C
+  500 CONTINUE
+      WRITE(IRD,10) CW
+      REWIND IRD
+      READ(IRD,511,ERR=9400,END=9500) NEOS, LIBN, LIBT, LAB(1:50),
+     1    RHUG, THUG
+  511 FORMAT(I3,I5,I2,A,2D10.0)
+  528 IF(LAB.EQ.' ') LAB='NO NAME MATERIAL'
+C
+C     CHECK FOR LIBRARY REQUEST
+C
+      IF(LIBN.NE.0) GO TO 800
+C
+C     NOT LIBRARY - READ REST OF INPUT
+C
+      REWIND IRD
+        DO 530 I=1,NREC
+  529   CONTINUE
+        READ (KINP,10,ERR=9400,END=9500) CW
+        IF((CW(1:1).EQ.'*').OR.(CW.EQ.' ')) GO TO 529
+        IF(NEW.NE.0) THEN
+C
+C         FIND ANEOS FIELD
+C
+          J1=INDEX(CW,'ANEOS')
+          IF(J1.LE.0) J1=INDEX(CW,'aneos')
+          IF(J1.LE.0) GO TO 9404
+          IF(CW(105:120).EQ.' ') CW(105:120)=' 0 0 0 0 0 0 0 0'
+          CWT=CW(J1:120)
+          J1=INDEX(CWT,' ')
+          IF(J1.LE.0) GO TO 9405
+          CW=CWT(J1:120)
+        END IF
+        WRITE(IRD,10) CW
+  530   CONTINUE
+C
+C     NOW READ PROCESSED RECORDS
+C
+      REWIND IRD
+      IDMP=IRD
+      J1=1
+        DO 550 I=1,NREC
+        IF(NEW.EQ.0) THEN
+          READ(IRD,538,ERR=9400,END=9500) (CZB(J2),J2=J1,J1+7)
+  538     FORMAT(8D10.0)
+        ELSE
+          READ(IRD,*,ERR=9400,END=9500) (CZB(J2),J2=J1,J1+7)
+        END IF
+  550   J1=J1+8
+      NUMEL=CZB(1)
+      IF((NUMEL.LE.0).OR.(NUMEL.GT.30)) GO TO 9406
+C
+C     READ ELEMENT RECORDS
+C
+      IDMP=KINP
+      IF(NEW.NE.0) GO TO 600
+C
+C     OLD ELEMENT FORMAT
+C
+      J1=1
+  570 J2=MIN(J1+4,NUMEL)
+  573 FORMAT(5(F5.0,D10.0))
+      READ(KINP,573,ERR=9400,END=9500) (ZZS(I),COT(I),I=J1,J2)
+      IF(J2.EQ.NUMEL) GO TO 800
+      J1=J1+5
+      GO TO 570
+C
+C     NEW ELEMENT FORMAT
+C
+  600 REWIND IRD
+        DO 610 I=1,NUMEL
+  605   CONTINUE
+        READ(KINP,10,ERR=9400,END=9500) CW
+        IF((CW(1:1).EQ.'*').OR.(CW.EQ.' ')) GO TO 605
+C
+C       FIND ANEOS FIELD
+C
+        J1=INDEX(CW,'ANEOS')
+        IF(J1.LE.0) J1=INDEX(CW,'aneos')
+        IF(J1.LE.0) GO TO 9407
+        CWT=CW(J1:120)
+        J1=INDEX(CWT,' ')
+        IF(J1.LE.0) GO TO 9408
+        CW=CWT(J1:120)
+        WRITE(IRD,10) CW
+  610   CONTINUE
+C
+C     NOW READ PROCESSED RECORDS
+C
+      REWIND IRD
+      IDMP=IRD
+        DO 620 I=1,NUMEL
+        READ(IRD,*,ERR=9400,END=9400) ZZS(I),COT(I)
+  620   CONTINUE
+C
+C     ALL DONE - NO ERROR
+C
+  800 CLOSE (IRD)
+      GO TO 2323
+C
+C     PROCESSING ERROR
+C
+ 9400 I=0
+      GO TO 9420
+ 9401 I=1
+      GO TO 9420
+ 9402 I=2
+      GO TO 9420
+ 9404 I=4
+      GO TO 9420
+ 9405 I=5
+      GO TO 9420
+ 9406 I=6
+      GO TO 9420
+ 9407 I=7
+      GO TO 9420
+ 9408 I=8
+      GO TO 9420
+ 9409 I=9
+      GO TO 9420
+ 9500 I=-1
+ 9420 CW='NEW'
+      IF(NEW.EQ.0) CW='OLD'
+      IF(NREC.EQ.5) CW='EXT'
+      CALL ANWARN(1)
+      WRITE(KLST,9427) ISETN, CW(1:3),I
+ 9427 FORMAT(/,' PROCESSING ANEOS INPUT DATA SET NUMBER',I3,
+     1     ' (',A,' FORMAT) ERR=',I3)
+      CW='ANEOS INPUT PROCESSING ERROR'
+      WRITE(KLST,9410) CW(1:50)
+ 9410 FORMAT(/,1X,A)
+      CALL ANMARK(CW)
+C
+C     try to point to input error
+C
+      WRITE(KLST,9441)
+ 9441 FORMAT(/,' INPUT ERROR NEAR')
+        DO 9440 I=1,NREC
+        BACKSPACE IDMP
+ 9440   CONTINUE
+          DO 9444 I=1,NREC
+          READ(IDMP,'(A)',ERR=9450,END=9450) CW
+          WRITE(KLST,'(1X,A)') CW(1:80)
+ 9444     CONTINUE
+ 9450 CONTINUE
+      NEOS=-1000-NEOS
+ 2323 RETURN
+      END

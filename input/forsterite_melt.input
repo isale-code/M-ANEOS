@@ -1,0 +1,79 @@
+*     EOS#     string for EOS name        Hugoniot initial      input format
+*                                      temperature  density     
+ANEOS1 -1  'FORSTERITE WITH MOLECULES AND MELT'  THUG=-1   RHUG=-1     LONG
+*
+*      nelem  type   rho0  temp0(K)  press0  B0/-Cbulk  Grun Tdebye(K)
+ANEOS2   3      4    3.227       298.       1.e6   -6.435E5   1.2    -736.
+*
+*                                   Critical Pt. Adj  Thermal Conduction
+*         S    3*C24   Evap   Tmelt(K)    C53   C54         H0    C41
+ANEOS3   1.06   2.     1.42E11    2163.     -9.E11   0.9         0.     0.
+*
+*                 Solid-solid phase transition data
+*       rhomin    D1     D2     D3      D4      D5    Hfusion  -rholiq
+ANEOS4   0.      4.65   4.9   6.6E11  4.E12  1.3E13    8.1e9     0.955
+*
+*     Cold comp. limits     Liquid EOS params       Interpolation params
+*       Up        L0      alpha    beta    gamma     C60     C61    C62
+ANEOS5  0.        0.       0.5      0.1       0.5        0.     0.      0.4
+*
+*   Ionization model    Reactive chemistry   ...............Molecular Clusters...............
+*       Ionflag         Eshift     Sshift      Atoms  Ebind(eV)   RotDOF    Rbond   VibDOF  
+ANEOS6     0              0.        0.           2      4.25          2.0     1.5E-8     1
+*
+*      ..............    Pcold/Expanded      Variables for future expansion
+*       Theta_vib(K)     LJflag  a_exp
+ANEOS7      2000.          1      1.7          0       0       0     0      0    
+*
+*    Elements in material (number must = nelem)
+*        Z   Atomic Fraction
+ANEOS8    8      0.571
+ANEOS9   12      0.286
+ANEOS10  14      0.143
+*
+*****   END of input for ANEOS
+* 
+*   Modified from: Benz et al. (1989) The origin of the moon and single-hypothesis III, Icarus, 81: 113-131.
+*   to include molecules, melt transition and fit to the Mg2SiO4 reference isobar. See Collins and Melosh (in prep.)
+*   for details.
+* 
+*   GSC: This is the best version for pure forsterite (incl. phase transition) with melt.
+*        It is a good fit to the Mg2SiO4 reference isobar and dunite/forsterite hugoniot data.
+*        Table 18 & 34. Forsterite Mg2SiO4. Anderson, O.L. & Isaak, D. G. (1995) AGU Reference Shelf, 2, 64-97.
+*        It is not well constrained around the critical point area.
+*        The parameters: Evap, C53, C54, Ebind and Rbond are not well constrained.
+*
+*   Note:  Lines must not be longer than 120 characters
+*
+*   Explanation of new input parameters for molecular clusters:
+*
+*   There are 8 new input parameters that appear on line ANEOS6 and ANEOS7 in the space
+*   Sam Thompson originally alloted for extensions.  You must use the LONG 
+*   input format to access this new data.
+*
+*
+*   Atoms is the number of atoms in the molecular cluster.  If Atoms = 0 or 1
+*          no molecular clusters are added.  The current code can treat both
+*          Atoms = 2 (diatomic) or Atoms = 3 (triatomic) clusters.
+*
+*   Ebind is the binding energy of the molecules in eV.
+*
+*   RotDOF is the number of rotational degrees of freedom in the molecule.  It is 2 for.
+*          a diatomic molecule.  Larger values increase the heat capacity of the molecular gas.
+*
+*   Rbond is the bond length of the clusters in cm.  This is needed to compute
+*         the moment of inertia (hence rotational energy level spacing) of the molecules.
+*
+*   VibDOF is the number of vibrational degrees of freedom.  It is 1 for diatomic molecules,
+*          but larger values apply to polyatomic molecules.
+*
+*  Theta_vib is the effective "debye" temperature of the molecule.  k * Theta_vib is the average
+*          spacing of vibrational energy levels.
+*
+*   flag = 0 uses the standard ANEOS cold pressure equation of state.
+*        = 1 substitues a Lennard-Jones cold potential for Pc when eta < 1.
+*
+*   Pc exp is the exponent of the density ratio in the Lennard-Jones potential
+*          for expanded states only. It has no effect on the compressed pressure.
+*          use this parameter to move the critical point.
+
