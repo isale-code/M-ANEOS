@@ -3,6 +3,7 @@ C
 C      PROGRAM TO INITIALIZE ANEOS AND CALL IT ONCE
 C
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      INTEGER STYLE
       PARAMETER (NDENS=0)
       PARAMETER (NTEMP=0)
       DIMENSION IZETL(21)
@@ -18,10 +19,19 @@ C
       COMMON /ANESQT/ SQTS(MATBUF),IPSQTS
       DIMENSION RHO(NDENS),TEMP(NTEMP),HISTDENS(100),HISTPRESS(100)
       DIMENSION HISTDPDR(100)
+      DIMENSION TARR(2000)
+      DIMENSION DARR(2000)
+      DIMENSION PARR(2000,2000)
+      DIMENSION SARR(2000,2000)
+      DIMENSION EARR(2000,2000)
+      DIMENSION CSARR(2000,2000)
+      DIMENSION CVARR(2000,2000)
+      DIMENSION ZKARR(2000,2000)
 C
       OPEN(10,FILE='ANEOS.INPUT',STATUS='OLD')
       OPEN(12,FILE='ANEOS.OUTPUT')
-      TCONV=1.16054D4
+C     corrected STSM 5/31/10=9
+      TCONV=1.16045D4
 C
 C     DEFINE ARRAYS OF DENSITY, TEMPERATURE
 C
@@ -43,149 +53,208 @@ C
       IZETL(1)=-1
       CALL ANEOS2 (1,1,0,IZETL)
 C
-C     CALL ANEOS1 FOR ARRAY OF DENSITY, TEMPERATURE
+C     ========================== STSM NEW EOS TABLE CONSTRUCTION ====================
+C     READ IN TABLE GRID POINTS FROM FILE
+C     FORMAT is a single column list of nden (int), ntemp (int), denarray, temparray. Arrays formatted as .6E in python
+C     loops in this section begin at 50
 C
-C    INITIAL CALL FOR A SINGLE TEMP, DENSITY
+      SESMATID=1.0
+      DATE=1.0
+      VERSION=1.0
+      FMN=1.0
+      FMW=1.0
+      RHO0REF=1.0
+      SESK0REF=1.0
+      T0REF=1.0
+      DCOUNT=1.0
+      TCOUNT=1.0
+      OPEN(13,FILE='tablegrid.txt',STATUS='OLD')
+      READ(13, '(E12.6)') SESMATID
+      READ(13, '(E12.6)') DATE
+      READ(13, '(E12.6)') VERSION
+      READ(13, '(E12.6)') FMN
+      READ(13, '(E12.6)') FMW
+      READ(13, '(E12.6)') RHO0REF
+      READ(13, '(E12.6)') SESK0REF
+      READ(13, '(E12.6)') T0REF
+      READ(13, '(E12.6)') DCOUNT
+      READ(13, '(E12.6)') TCOUNT
+      DO 50 I=1,DCOUNT
+      READ(13, '(E12.6)') DARR(I)
+ 50   CONTINUE
+      DO 51 I=1,TCOUNT
+      READ(13, '(E12.6)') TMP
+      TARR(I) = TMP/TCONV
+ 51   CONTINUE
+      CLOSE(13)
 C
-C      TEMP1=3.D3/TCONV
-C      RHO1=1.D-4
-C      CALL ANEOS1 (TEMP1,RHO1,P,E,S,CV,DPDT,DPDR,M)
+C     CALL ANEOSV TO FILL IN THE ARRAYS OF THERMODYNAMIC VARIABLES
 C
-      DEL=1.D-3
-      DELTA=1.D0+DEL
-      DO 100 I=1,NDENS
-      DO 200 J=1,NTEMP
-C
-C     CALL ANEOS FOR DIRECT CALCULATIONS
-C
-      IPSQTS=1    
-      SQTS(IPSQTS)=DSQRT(TEMP(J))    !square root of temperature for aneos1
-      CALL ANEOS1 (TEMP(J),RHO(I),P,E,S,CV,DPDT,DPDR,M)
-      W0=W
-      Y0=Y
-      ZZ0=ZZ
-      ZVIB0=ZVIB
-      PSI0=PSI
-      GAMMA0=GAMMA
-      THETA0=THETA
-      ALFA0=ALFA
-      BETA0=BETA
-      DBDT0=DBDT
-      DADT0=DADT
-      DADR0=DADR
-C
-C    DEFINE INTERMEDIATE QUANTITIES IN CONSTRUCTING THERMO QUANTITIES
-C
-      EMFRAC=EM
-      ENFRAC=EN
-      EEFRAC=EE
-      ECFRAC=EC
-      PMFRAC=PM
-      PNFRAC=PN
-      PEFRAC=PE
-      PCFRAC=PC
-      SMFRAC=SM
-      SEFRAC=SE
-      SNFRAC=SN
-      CVMFRAC=CVM
-      CVEFRAC=CVE
-      CVNFRAC=CVN
-C
-C     CALL ANEOS TO COMPUTE DERIVATIVES DIRECTLY
-C
-      CALL ANEOS1 (TEMP(J),RHO(I)*DELTA,P2,E2,S2,CV2,DPDT2,DPDR2,M)
-      ALFA2=ALFA
-      ZZ2=ZZ
-      SQTS(IPSQTS)=DSQRT(TEMP(J)*DELTA)
-      CALL ANEOS1 (TEMP(J)*DELTA,RHO(I),P1,E1,S1,CV1,DPDT1,DPDR1,M)
-      ALFA1=ALFA
-      BETA1=BETA
-      ZZ1=ZZ
-C
-      ALFAC=-1.5D0*(ZZ2-ZZ0)/(DEL*ZZ0)
-      BETAC=(ZZ1-ZZ0)/(DEL*ZZ0)
-C
-      CVC=(E1-E)/(TEMP(J)*DEL)
-      DPDTC=(P1-P)/(TEMP(J)*DEL)
-      DPDRC=(P2-P)/(RHO(I)*DEL)
-      DBDTC=(BETA1-BETA0)/DEL
-      DADTC=(ALFA1-ALFA0)/DEL
-      DADRC=(ALFA2-ALFA0)/DEL
-C
-      DSDR=(S2-S)/(RHO(I)*DEL)
-      DPDT=(P1-P)/(TEMP(J)*DEL)
-C
-C    WRITE OUT RESULTS
-C
-      WRITE(KLST,1000) RHO(I),TEMP(J)*TCONV
-      WRITE(KLST,2000) P,P2,E,E1,S,S2,CV,CVC,DPDT,DPDTC,DPDR,DPDRC
-      WRITE(KLST,3000) -DSDR*RHO(I)**2,DPDT
-      WRITE(KLST,4000) ZVIB0,Y0,W0,ZZ0,PSI0,GAMMA0,THETA0
-      WRITE(KLST,5000) ALFA0, ALFAC,BETA0,BETAC,
-     &         DADT0,DADTC,DADR0,DADRC,DBDT0,DBDTC,H1,H2
-      WRITE(KLST,9000) ECFRAC,ENFRAC,EMFRAC,EMLT,EEFRAC,
-     &                  PCFRAC,PNFRAC,PMFRAC,PMLT,PEFRAC,
-     &                         SNFRAC,SMFRAC,SMLT,SEFRAC,
-     &                         CVNFRAC,CVMFRAC,CVMLT,CVEFRAC
- 200  CONTINUE
- 100  CONTINUE
-C
-C     CALL ANEOS TO CONSTRUCT A TABLE OF THERMODYNAMIC FUNCTIONS AT 1 BAR
-C
-      PREF=1.D6      !REFERENCE PRESSURE =  1 ATMOSPHERE
-      DENS=RHO0      !STARTING GUESS OF DENSITY
-      TOL=1.D-7      !PRECISION OF CONVERGENCE TO REF PRESSURE
-      WRITE(KLST,6000)
-      DO 300 J=1,100
-      T=1.D2*DFLOAT(J)/TCONV  !100 DEGREE K STEPS, LIKE JANAF TABLES
-      ICOUNT=0
- 400  CONTINUE
-      CALL ANEOSV (1,T,DENS,1,P,E,S,CV,DPDT,DPDR,FKRO,CS,KPA,
+C      PREF=1.D6      !REFERENCE PRESSURE =  1 ATMOSPHERE
+C      TOL=1.D-7      !PRECISION OF CONVERGENCE TO REF PRESSURE
+      
+      DO 61 I=1,DCOUNT
+      DO 60 J=1,TCOUNT
+      CALL ANEOSV (1,TARR(J),DARR(I),1,P,E,S,CV,DPDT,DPDR,FKRO,CS,KPA,
      &  R2PL,R2PH,ZBAR)
-      IF (DABS(1.D0-P/PREF).LT.TOL) THEN
-        GOTO 250
+      IF (ABS(P) .GE. 1E-20) THEN
+         PARR(I,J) = P
       ELSE
-        ICOUNT=ICOUNT+1
-        HISTDENS(ICOUNT)=DENS
-        HISTPRESS(ICOUNT)=P
-        HISTDPDR(ICOUNT)=DPDR
-        IF(ICOUNT.GT.100) THEN
-          WRITE(KLST,*) 'ITERATION FAILED FOR T = ',T*TCONV
-	    WRITE(KLST,8700)
-	    DO 201 K=1,50
-	      WRITE(KLST,8900) K,HISTDENS(K),HISTPRESS(K),HISTDPDR(K)
- 201        CONTINUE
-	    GOTO 300
-	  ENDIF
-	  DENSOLD=DENS
-        DENS=DENS-(P-PREF)/DPDR          !I need to improve this for dpdr = 0!
-	  IF(DENS.LT.0.D0) DENS=0.5*DENSOLD  !NEWTON FAILS AT VAPORIZATION TEMP
-	  GOTO 400
+         PARR(I,J) = 1.E-20
       ENDIF
-  250 CONTINUE
-      HSI=(E+P/DENS)*1.D-4    !ENTHALPY IN SI UNITS
-      GSI=HSI-T*S*1.D-4       !GIBBS ENERGY IN SI UNITS
-      WRITE(KLST,8000) T*TCONV,DENS*1.D3,P*1.D-10,E*1.D-4,HSI,
-     & S*(1.D-4/TCONV),GSI,KPA,ICOUNT
-  300 CONTINUE
+      SARR(I,J) = S
+      EARR(I,J) = E
+      CSARR(I,J) = CS
+      CVARR(I,J) = CV
+      ZKARR(I,J) = KPA
+ 60   CONTINUE
+ 61   CONTINUE
+
+
+C     WRITE SESAME TABLE TO FILE
+      OPEN(14,FILE='NEW-SESAME-EXT.TXT')
+C     WRITE SESAME HEADER INFORMATION: EOS matid number, number of words in section
+C     could input matid, date, version with the grid
+      NWDS=9
+      SESNTABLES=2.0
+      TABLE1 = 201.0
+      TABLE2 = 301.0
+C     5 entries in 201 table
+      SESNWDS1=5.0
+C     Number of entries in EXTENDED 301 table: 4 variables at each rho,T point: S, cs, cv, KPA
+      SESNWDS2=2.+DCOUNT+TCOUNT+DCOUNT*TCOUNT*4.
+C     HEADER SECTION
+      WRITE(14, 8253) INT(SESMATID), NWDS
+C     readf,unit,matid,date,date,version,ntables,format="(5(E16.8E2))"
+C     readf,unit,t1,t2,nwds1,nwds,format="(4(E16.8E2))"
+      WRITE(14, 8254) SESMATID, DATE, DATE, VERSION, SESNTABLES
+      WRITE(14, 8255) TABLE1, TABLE2, SESNWDS1, SESNWDS2
+C     201 SECTION
+      WRITE(14, 8256) INT(TABLE1),INT(SESNWDS1)
+C     readf,unit,fmn,fmw,rho0_ref,k0_ref,t0_ref,format="(5(E16.8E2))"
+      WRITE(14, 8254) FMN, FMW, RHO0REF, SESK0REF, T0REF
+      WRITE(14, 8256) INT(TABLE2),INT(SESNWDS2)
+C     number of density points, number of temperature points in grid
+      WRITE(14, 8251) DCOUNT, TCOUNT
+      STYLE=2
+C     density array g/cm3
+      DO 70 K=1, DCOUNT
+      WRITE(14,8250) DARR(K)
+      STYLE=STYLE+1
+      IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
+ 70   CONTINUE
+C     temperature array eV to K
+      DO 71 J=1, TCOUNT
+      WRITE(14,8250) TARR(J)*TCONV
+      STYLE=STYLE+1
+      IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
+ 71   CONTINUE
+C     specific entropy in ergs/eV/g to MJ/K/kg
+      DO 78 J=1, TCOUNT
+      DO 79 K=1, DCOUNT
+      WRITE(14,8250) SARR(K,J)*(1.D-10/TCONV)
+      STYLE=STYLE+1
+      IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
+ 79   CONTINUE
+ 78   CONTINUE
+C     sound speed in cm/s
+      DO 80 J=1, TCOUNT
+      DO 81 K=1, DCOUNT
+      WRITE(14,8250) CSARR(K,J)
+      STYLE=STYLE+1
+      IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
+ 81   CONTINUE
+ 80   CONTINUE
+C     specific heat capacity in erg/eV/g to MJ/kg/K
+      DO 82 J=1, TCOUNT
+      DO 83 K=1, DCOUNT
+      WRITE(14,8250) CVARR(K,J)*(1.D-10/TCONV)
+      STYLE=STYLE+1
+      IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
+ 83   CONTINUE
+ 82   CONTINUE
+C     KPA FLAG
+      DO 84 J=1, TCOUNT
+      DO 85 K=1, DCOUNT
+      WRITE(14,8250) ZKARR(K,J)
+      STYLE=STYLE+1
+      IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
+ 85   CONTINUE
+ 84   CONTINUE
 C
-C    CALL ANEOS TO COMPUTE AND PRINT THE COLD PRESSURE FOR A RANGE OF DENSITY
+      CLOSE(14)
+
+C     WRITE STANDARD (SHORT) SESAME FILE
+C     WRITE SESAME TABLE TO FILE LIMITED TO P, E, HFE
+      OPEN(14,FILE='NEW-SESAME-STD.TXT')
+C     WRITE SESAME HEADER INFORMATION: EOS matid number, number of words in section
+C     could input matid, date, version with the grid
+      NWDS=9
+      SESNTABLES=2.0
+      TABLE1 = 201.0
+      TABLE2 = 301.0
+C     5 entries in 201 table
+      SESNWDS1=5.0
+C     Number of entries in STANDARD 301 table: 3 variables at each rho,T point: P, U, A
+      SESNWDS2=2.+DCOUNT+TCOUNT+DCOUNT*TCOUNT*3.
+C     HEADER SECTION
+      WRITE(14, 8253) INT(SESMATID), NWDS
+C     readf,unit,matid,date,date,version,ntables,format="(5(E16.8E2))"
+C     readf,unit,t1,t2,nwds1,nwds,format="(4(E16.8E2))"
+      WRITE(14, 8254) SESMATID, DATE, DATE, VERSION, SESNTABLES
+      WRITE(14, 8255) TABLE1, TABLE2, SESNWDS1, SESNWDS2
+C     201 SECTION
+      WRITE(14, 8256) INT(TABLE1),INT(SESNWDS1)
+C     readf,unit,fmn,fmw,rho0_ref,k0_ref,t0_ref,format="(5(E16.8E2))"
+      WRITE(14, 8254) FMN, FMW, RHO0REF, SESK0REF, T0REF
+      WRITE(14, 8256) INT(TABLE2),INT(SESNWDS2)
+C     number of density points, number of temperature points in grid
+      WRITE(14, 8251) DCOUNT, TCOUNT
+      STYLE=2
+C     density array g/cm3
+      DO 100 K=1, DCOUNT
+      WRITE(14,8250) DARR(K)
+      STYLE=STYLE+1
+      IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
+100   CONTINUE
+C     temperature array eV to K
+      DO 101 J=1, TCOUNT
+      WRITE(14,8250) TARR(J)*TCONV
+      STYLE=STYLE+1
+      IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
+101   CONTINUE
+C     pressure array dynes/cm2 to GPa
+      DO 102 J=1, TCOUNT
+      DO 103 K=1, DCOUNT
+C      IF (PARR(K,J) .LT. 1.D-20 .AND. PARR(K,J) .GT. 0.) 
+C     &    PARR(K,J)=1.D-20
+      WRITE(14,8250) PARR(K,J)*1.D-10
+      STYLE=STYLE+1
+      IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
+103   CONTINUE
+102   CONTINUE
+C     specific internal energy array in ergs/g to MJ/kg
+      DO 104 J=1, TCOUNT
+      DO 105 K=1, DCOUNT
+      WRITE(14,8250) EARR(K,J)*1.D-10
+      STYLE=STYLE+1
+      IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
+105   CONTINUE
+104   CONTINUE
+C     Helmholtz free energy array in ergs/g to MJ/kg
+      DO 106 J=1, TCOUNT
+      DO 107 K=1, DCOUNT
+      WRITE(14,8250) (EARR(K,J)-TARR(J)*SARR(K,J))*(1.D-10)
+      STYLE=STYLE+1
+      IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
+107   CONTINUE
+106   CONTINUE
 C
-      DENS0=RHO00    !REFERENCE DENSITY AT ZERO TEMPERATURE
-      NDENSIT=100
-      DMIN=5.D-2
-      DMAX=5.0D0
-      DINC=(DMAX-DMIN)/DFLOAT(NDENSIT-1)
-      WRITE(KLST,8300)
-      DO 500 J=1,NDENSIT
-      DENS=DMIN+DINC*DFLOAT(J-1)
-      ETA=DENS/DENS0
-      CALL ANEOS1 (1.D-6,DENS,P,E,S,CV,DPDT,DPDR,M)
-      GCOLD=E+P/DENS
-      WRITE(KLST,8500) DENS,P,E,GCOLD,DPDR,ETA
-500   CONTINUE
-      STOP
+      CLOSE(14)
 C
+C     =====================END STSM SECTION====================
+C
+CCCCCC========================================
 1000  FORMAT(///'DENSITY = ',1PE15.5,'  TEMP(K) = ',1PE15.5//)
 2000  FORMAT('  ANALYTIC COMPUTATIONAL RESULTS FROM ANEOS1'// 
      &'       PRESSURE = ',1PE15.5,'   AT RHO+DELTA RHO  = ',1PE15.5/
@@ -219,9 +288,24 @@ C
      & '     #ITER'/
      & '         K           kg/m**3         GPa            J/kg',
      & '           J/kg           J/kg-K         J/kg'/)
+6100  FORMAT(//' THERMODYNAMIC FUNCTIONS OF TEMPERATURE AT 1 BAR,'//
+     & '        TEMP         DENSITY       PRESSURE       ENERGY',
+     & '         ENTROPY       PHASE',
+     & '     #ITER'/
+     & '         K           kg/m**3         GPa            J/kg',
+     & '         J/kg-K '/)
 7000  FORMAT(//' PRESSURE ITERATION FAILS TO CONVERGE AFTER ',
      & I5,' STEPS'//)
 8000  FORMAT(7(1PE15.5),5X,I2,5X,I5)
+8100  FORMAT(5(1PE15.5),5X,I2,5X,I5)
+8200  FORMAT(3(1PE15.8))
+8250  FORMAT(1(1PE16.8), $)
+8251  FORMAT(2(1PE16.8), $)
+8252  FORMAT(2(I16), $)
+8253  FORMAT(' INDEX     MATID =',I7,'   NWDS = ',I8)
+8254  FORMAT(5(1PE16.8E2))
+8255  FORMAT(4(1PE16.8E2))
+8256  FORMAT(' RECORD',5X,'TYPE =',I5,5X,'NWDS = ',I8)
 8300  FORMAT(//' COLD PRESSURE DEPENDENCE ON DENSITY, CGS UNITS'//
      &'       DENSITY       PRESSURE       ENERGY         GIBBS',
      &'           DPDR           ETA'/)
@@ -236,5 +320,15 @@ C
      &'   PRESSURE ',5(1PE15.5)/
      &'   ENTROPY  ',15X,4(1PE15.5)/
      &'   HEAT CAP.',15X,4(1PE15.5))
+ 9001 FORMAT(//'EOS TABLE'//)
+ 9002 FORMAT(//'DENSITY'//)
+ 9003 FORMAT(//'TEMPERATURE'//)
+ 9004 FORMAT(//'PRESSURE'//)
+ 9005 FORMAT(//'ENERGY'//)
+ 9006 FORMAT(//'ENTROPY'//)
+ 9007 FORMAT(//'SOUND SPEED'//)
+ 9008 FORMAT(//'KPA FLAG'//)
+ 9009 FORMAT(//'END OF FILE'//)
 C
       END
+
