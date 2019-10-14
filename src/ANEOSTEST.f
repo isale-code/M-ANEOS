@@ -59,6 +59,7 @@ CSTS ADDS --help, --no_table, and file checks
            WRITE(*,9120)
            WRITE(*,9121)
            WRITE(*,9122)
+           WRITE(*,9123)
            call EXIT(0)
       ENDIF
       INQUIRE(FILE="ANEOS.INPUT", EXIST=file_exists)
@@ -411,8 +412,9 @@ CSTS --help
  9118 FORMAT('   Density grid points')
  9119 FORMAT('   Temperature grid points')
  9120 FORMAT('Output files:')
- 9121 FORMAT('   NEW-SESAME-STD.TXT  Standard 201 and 301 tables')
- 9122 FORMAT('   NEW-SESAME-EXT.TXT  Extra variables 301-style table')
+ 9121 FORMAT('   ANEOS.OUTPUT')
+ 9122 FORMAT('   NEW-SESAME-STD.TXT  Standard 201 and 301 tables')
+ 9123 FORMAT('   NEW-SESAME-EXT.TXT  Extra variables 301-style table')
 CSTS end --help
 C
       END
