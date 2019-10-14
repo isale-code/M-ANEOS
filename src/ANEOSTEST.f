@@ -28,6 +28,60 @@ C
       DIMENSION CVARR(2000,2000)
       DIMENSION ZKARR(2000,2000)
 C
+CSTS ADDS --help, --no_table, and file checks
+      character(:), allocatable :: arg
+      integer arglen, stat
+      logical file_exists
+      call get_command_argument(number=1, length=arglen)  ! Assume for simplicity success
+      allocate (character(arglen) :: arg)
+      call get_command_argument(number=1, value=arg, status=stat)
+      IF (arg.EQ.'--help') THEN
+           WRITE(*,9100)
+           WRITE(*,9101)
+           WRITE(*,9102)
+           WRITE(*,9103)
+           WRITE(*,9104)
+           WRITE(*,9105)
+           WRITE(*,9106)
+           WRITE(*,9107)
+           WRITE(*,9108)
+           WRITE(*,9109)
+           WRITE(*,9110)
+           WRITE(*,9111)
+           WRITE(*,9112)
+           WRITE(*,9113)
+           WRITE(*,9114)
+           WRITE(*,9115)
+           WRITE(*,9116)
+           WRITE(*,9117)
+           WRITE(*,9118)
+           WRITE(*,9119)
+           WRITE(*,9120)
+           WRITE(*,9121)
+           WRITE(*,9122)
+           call EXIT(0)
+      ENDIF
+      INQUIRE(FILE="ANEOS.INPUT", EXIST=file_exists)
+      IF (file_exists) THEN
+C         WRITE(*,*)'ANEOS.INPUT exists'
+      ELSE
+         WRITE(*,*)'Missing ANEOS.INPUT file'
+         WRITE(*,*)'See --help'
+         call EXIT(0)
+      ENDIF
+      IF (arg.NE.'--no_table') THEN
+        INQUIRE(FILE="tablegrid.txt", EXIST=file_exists)
+        IF (file_exists) THEN
+C         WRITE(*,*)'tablegrid.txt exists'
+         ELSE
+           WRITE(*,*)'Missing tablegrid.txt file'
+           WRITE(*,*)'Use --no_table flag to run without file'
+           WRITE(*,*)'See --help'
+           call EXIT(0)
+        ENDIF
+      ENDIF
+CSTS  END --help, --no_table checks
+C
       OPEN(10,FILE='ANEOS.INPUT',STATUS='OLD')
       OPEN(12,FILE='ANEOS.OUTPUT')
 C     corrected STSM 5/31/10=9
@@ -54,6 +108,9 @@ C
       CALL ANEOS2 (1,1,0,IZETL)
 C
 C     ========================== STSM NEW EOS TABLE CONSTRUCTION ====================
+      IF (arg.EQ.'--no_table') THEN
+         call EXIT(0)
+      ENDIF
 C     READ IN TABLE GRID POINTS FROM FILE
 C     FORMAT is a single column list of nden (int), ntemp (int), denarray, temparray. Arrays formatted as .6E in python
 C     loops in this section begin at 50
@@ -68,6 +125,8 @@ C
       T0REF=1.0
       DCOUNT=1.0
       TCOUNT=1.0
+
+      
       OPEN(13,FILE='tablegrid.txt',STATUS='OLD')
       READ(13, '(E12.6)') SESMATID
       READ(13, '(E12.6)') DATE
@@ -252,6 +311,7 @@ C     Helmholtz free energy array in ergs/g to MJ/kg
 C
       CLOSE(14)
 C
+C      WRITE(*,9200)
 C     =====================END STSM SECTION====================
 C
 CCCCCC========================================
@@ -329,6 +389,31 @@ CCCCCC========================================
  9007 FORMAT(//'SOUND SPEED'//)
  9008 FORMAT(//'KPA FLAG'//)
  9009 FORMAT(//'END OF FILE'//)
+CSTS --help
+ 9100 FORMAT('ANEOS INPUTS:')
+ 9101 FORMAT('   ANEOS.INPUT   = formatted material parameter file')
+ 9102 FORMAT('   tablegrid.txt = SESAME table parameters (optional)')
+ 9103 FORMAT('Optional command line argument:')
+ 9104 FORMAT('   --help')
+ 9105 FORMAT('   --no_table')
+ 9106 FORMAT('     Do not generate a SESAME table.')
+ 9107 FORMAT('tablegrid.txt format: single column of floats')
+ 9108 FORMAT('   SESMATID')
+ 9109 FORMAT('   DATE')
+ 9110 FORMAT('   VERSION')
+ 9111 FORMAT('   FORMULA TOTAL ATOMIC NUMBER')
+ 9112 FORMAT('   FORMULA WEIGHT')
+ 9113 FORMAT('   Reference density')
+ 9114 FORMAT('   Reference bulk modulus')
+ 9115 FORMAT('   Reference temperature')
+ 9116 FORMAT('   Number of density points in grid')
+ 9117 FORMAT('   Number of temperature poitns in grid')
+ 9118 FORMAT('   Density grid points')
+ 9119 FORMAT('   Temperature grid points')
+ 9120 FORMAT('Output files:')
+ 9121 FORMAT('   NEW-SESAME-STD.TXT  Standard 201 and 301 tables')
+ 9122 FORMAT('   NEW-SESAME-EXT.TXT  Extra variables 301-style table')
+CSTS end --help
 C
       END
 
