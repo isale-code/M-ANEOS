@@ -62,6 +62,6 @@ Available input files can be found in the `input` directory.
 
 quartz.input - Melosh H. J. (2007) [A hydrocode equation of state for SiO2](./docs/Melosh2007.pdf). Meteoritics & Planetary Science, 42:2079–98.
 
-serpentine.input - Brookshaw, L. (1998) [An Equation of State for Serpentine](./docs/Brookshaw1998.pdf), Tech. Rep. Working Paper Series SC-MC-9813 (Queensland: Faculty of Sciences, University of Southern Queensland)
+serpentine.input - Brookshaw, L. (1998) [An Equation of State for Serpentine](./docs/Brookshaw.pdf), Tech. Rep. Working Paper Series SC-MC-9813 (Queensland: Faculty of Sciences, University of Southern Queensland)
 
 dunite.input - Collins G. S. and Melosh H. J. (2014) "[Improvements to ANEOS for multiple phase transitions](./docs/CollinsPosterLPSC2014.pdf)," in 45th Lunar and Planetary Science Conference, p. [2664](./docs/CollinsANEOSLPSC2014.pdf).
