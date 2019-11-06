@@ -52,7 +52,7 @@ M-ANEOS is provided with a very bare-bones makefile, which should be modified fo
 
 To compile run `make` in the `src` directory. This creates library `libaneos.a` and executable `m-aneos`.
 
-To run without generating a output table, invoke `m-aneos --no_table` in a directory containing a correctly formatted ANEOS input file with the name `ANEOS.INPUT`. This will produce the standard ANEOS output file `ANEOS.OUTPUT`.
+To run without generating an output table, invoke `m-aneos --no_table` in a directory containing a correctly formatted ANEOS input file with the name `ANEOS.INPUT`. This will produce the standard ANEOS output file `ANEOS.OUTPUT`.
 
 Simple usage instructions are printed with `m-aneos --help`.
 
