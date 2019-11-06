@@ -76,12 +76,12 @@ C
       PARAMETER (THALF=3.D0/2.D0)
       PARAMETER (FLGJWL=0.0252525D0)
 C      PARAMETER (QCC1=1.D-10)    !SUPPLIED VALUE DOES NOT WORK WELL ON MAC
-      PARAMETER (QCC1=1.D-6)      !low density cutoff for solid terms
+C      PARAMETER (QCC1=1.D-6)      !low density cutoff for solid terms - now input parameter STS
       PARAMETER (QCC2=0.2D0)
       PARAMETER (QCC3=30.D0)
       PARAMETER (QCC4=20.D0)
       PARAMETER (QCC5=1.D-5)      !min temperature for gas treatment, units of theta
-      PARAMETER (QCC6=1.D5)       !psi value at switch to pure gas treatment
+C      PARAMETER (QCC6=1.D5)       !psi value at switch to pure gas treatment - now input parameter STS
       PARAMETER (QCC7=2.5D0)
       PARAMETER (QCC8=0.07D0)     !maximum temperature for Saha computation in eV
       PARAMETER (QCC9=0.5D11)
@@ -107,6 +107,23 @@ C
       IF (ACK(L+25).EQ.FLGJWL) GO TO 806
 C
       FT=BOLTS*ACK(L+27)  !Boltzman k * N0
+C
+CSTS
+CSTS  Term added to adjust heat capacity STSM 20190630 ACK(L+88) from UI(44)
+      QCC1=1.D-10               ! original parameter value
+      QCC6=1.D5                 ! original parameter value
+      FCV=ONE                    ! initialize the thermal adjustment parameter to default 3Nk limit
+      IF(ACK(L+89).GT.ZERO) THEN ! If entered, use it
+         QCC1 = ACK(L+89)
+      ENDIF
+      IF(ACK(L+90).GT.ZERO) THEN ! If entered, use it
+         QCC6 = ACK(L+90)
+      ENDIF
+      IF(ACK(L+88).GT.ZERO) THEN ! If no entry, then default to ONE to use 3Nk limit.
+         FCV = ACK(L+88)         ! Heat capacity adjustment parameter. Enter 1 to multiply by 3 for Cv=3Nk limit.
+      ENDIF
+CSTS
+C
 CHJM
 CRMC    Be careful to initialize molecular quantities--thanks Robin!
 CHJM                                                    11/4/01
@@ -454,26 +471,60 @@ C
 C
 C         normal approximation of debye functions
 C
-            PN=RHO*FTT*X2*X5
-            EN=THALF*FTT*X2*X4
-            SN=FT*(FOUR-THREE*LOG(THETA/T)+THALF*(LOG(X2)/BB-X3))
-            CVN=EN*(ONE-BB*X3/X4)/T
-            DPDT=PN*(ONE+BB*X3*X6/X5)/T
-            DPDR=DPDR+PN*(ONE+BB*X3*X6**2/(THALF*X5))/RHO
-     &           +THREE*RHO*GAMP*FTT*X2
+Coriginal
+C            PN=RHO*FTT*X2*X5
+C            EN=THALF*FTT*X2*X4
+C            SN=FT*(FOUR-THREE*LOG(THETA/T)+THALF*(LOG(X2)/BB-X3))
+C            CVN=EN*(ONE-BB*X3/X4)/T
+C            DPDT=PN*(ONE+BB*X3*X6/X5)/T
+C            DPDRTMP = DPDR
+C            DPDR=DPDRTMP+PN*(ONE+BB*X3*X6**2/(THALF*X5))/RHO
+C     &           +THREE*RHO*GAMP*FTT*X2
+C            WRITE(KLST,1000) PN,EN,SN,CVN,DPDT,DPDR
+CSTS
+            PN=FCV*THREE*RHO*FTT*GAMMA+
+     &         FTT*RHO*X3*(ONE-THREE*GAMMA)
+            EN=FCV*THREE*FTT-THALF*FTT*X3
+            SN=FT*(FOUR*FCV-FCV*THREE*LOG(THETA/T)+
+     &         THALF*(LOG(X2)/BB-X3))
+            CVN=EN/T-THALF*FT*BB*(X3-X3*X3)
+            DPDT=PN/T+BB*FT*RHO*(ONE-THREE*GAMMA)*(X3-X3*X3)
+            DPDR=DPDR+PN/RHO+FCV*THREE*FTT*RHO*GAMP-
+     &           FTT*RHO*X3*THREE*GAMP+
+     &           TWO*BB*FTT*X6*X6*X3*(ONE-X3)/THREE
+C            WRITE(KLST,1001) PN,EN,SN,CVN,DPDT,DPDR
+CSTS
          ELSE
 C
 C         full treatment of debye functions
 C
             CALL ANDEBY(-THETA,T,DFUNC,D2,DS)
 C
-            PN=RHO*FTT*(X1*DFUNC+X6*X3)
-            EN=FTT*(THREE*DFUNC-THALF*X3)
-            SN=FT*(FOUR*DFUNC-THREE*D2+THALF*(LOG(X2)/BB-X3))
-            CVN=FT*(THREE*DS-THALF*BB*X3*X2)+EN/T
-            DPDT=RHO*FT*(X1*DS+X6*BB*X3*X2)+PN/T
-            DPDR=PN/RHO+FTT*(THREE*RHO*(DFUNC-X3)*GAMP
-     &           -X1*DS*GAMMA+BB*PSIB*(X6*X2)**2/THALF)+DPDR
+Coriginal
+C            PN=RHO*FTT*(X1*DFUNC+X6*X3)
+C            EN=FTT*(THREE*DFUNC-THALF*X3)
+C            SN=FT*(FOUR*DFUNC-THREE*D2+THALF*(LOG(X2)/BB-X3))
+C            CVN=FT*(THREE*DS-THALF*BB*X3*X2)+EN/T
+C            DPDT=RHO*FT*(X1*DS+X6*BB*X3*X2)+PN/T
+C            DPDRTMP=DPDR
+C            DPDR=PN/RHO+FTT*(THREE*RHO*(DFUNC-X3)*GAMP
+C     &           -X1*DS*GAMMA+BB*PSIB*(X6*X2)**2/THALF)+DPDRTMP
+C            WRITE(KLST,1000) PN,EN,SN,CVN,DPDT,DPDR
+CSTS
+            PN=FCV*THREE*RHO*FTT*GAMMA*DFUNC+
+     &         FTT*RHO*X3*(ONE-THREE*GAMMA)
+            EN=FCV*THREE*FTT*DFUNC-THALF*FTT*X3
+            SN=FT*(FOUR*FCV*DFUNC-FCV*THREE*D2+
+     &         THALF*(LOG(X2)/BB-X3))
+            CVN=EN/T+THREE*FCV*FT*DS-THALF*FT*BB*X3*(ONE-X3)
+            DPDT=PN/T+THREE*FCV*FT*RHO*GAMMA*DS+
+     &            BB*FT*RHO*(ONE-THREE*GAMMA)*(X3-X3*X3)
+            DPDR=PN/RHO+FCV*THREE*FTT*RHO*GAMP*DFUNC-
+     &           THREE*FCV*FTT*GAMMA*GAMMA*DS-            
+     &           FTT*RHO*X3*THREE*GAMP+
+     &           TWO*BB*FTT*X6*X6*X3*(ONE-X3)/THREE+DPDR
+C            WRITE(KLST,1001) PN,EN,SN,CVN,DPDT,DPDR
+CSTS
          END IF
 CHJM
 CHJM      modified for molecular clusters
@@ -655,5 +706,7 @@ C
   270 FKROS=QCC15
       ZBAR=ZERO
 C
+ 1000 FORMAT(//,'OLD: ',D15.6,D15.6,D15.6,D15.6,D15.6,D15.6/)
+ 1001 FORMAT(//,'NEW: ',D15.6,D15.6,D15.6,D15.6,D15.6,D15.6/)
       RETURN
       END
