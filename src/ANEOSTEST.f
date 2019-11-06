@@ -27,6 +27,7 @@ C
       DIMENSION CSARR(2000,2000)
       DIMENSION CVARR(2000,2000)
       DIMENSION ZKARR(2000,2000)
+      INTEGER DCOUNT,TCOUNT
 C
 CSTS ADDS --help, --no_table, and file checks
       character(:), allocatable :: arg
@@ -35,6 +36,12 @@ CSTS ADDS --help, --no_table, and file checks
       call get_command_argument(number=1, length=arglen)  ! Assume for simplicity success
       allocate (character(arglen) :: arg)
       call get_command_argument(number=1, value=arg, status=stat)
+      IF (arg.NE.'--quiet') THEN
+         write(*,9020)
+         write(*,9021)
+         write(*,9022)
+         write(*,9023)
+      ENDIF
       IF (arg.EQ.'--help') THEN
            WRITE(*,9100)
            WRITE(*,9101)
@@ -390,6 +397,21 @@ CCCCCC========================================
  9007 FORMAT(//'SOUND SPEED'//)
  9008 FORMAT(//'KPA FLAG'//)
  9009 FORMAT(//'END OF FILE'//)
+CGSC Header
+ 9020 FORMAT(//'M-ANEOS - an extension of the ANEOS FORTRAN77 program',
+     $' for the construction of thermodynamic equations of state'//
+     $'                         http://github.com/isale-code/M-ANEOS')
+ 9021 FORMAT(' ANEOS was developed by S. L. Thompson and H. S. Lauson',
+     $' at Sandia National Laboratory.'//
+     $' M-ANEOS includes modifications by',
+     $' H. J. Melosh, G. S. Collins and S. T. Stewart.'//)
+ 9022 FORMAT('For usage instructions add the command-line argument',
+     $' --help; to suppress this header, use --quiet'//)      
+ 9023 FORMAT('For information about M-ANEOS including how to cite',
+     $' the code in scientific works and papers, please see:'//
+     $'https://github.com/isale-code/M-ANEOS/blob/master/README.md#',
+     $'citing-m-aneos-and-m-aneos-derived-equations-',
+     $'of-state-in-scientific-works'//)
 CSTS --help
  9100 FORMAT('ANEOS INPUTS:')
  9101 FORMAT('   ANEOS.INPUT   = formatted material parameter file')
