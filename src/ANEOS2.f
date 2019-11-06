@@ -172,7 +172,7 @@ C
       PARAMETER (QCL46=1.2D0)       !JWL high explosive EOS
       PARAMETER (QCL47=1.01D0)      !increment for critical temperature
       PARAMETER (QCL48=1.0001D0)    !min difference of solid/melt density for test
-      PARAMETER (QCL49=0.06D0)      !log increment for melt/solid table
+      PARAMETER (QCL49=0.01D0)      !log increment for melt/solid table
       PARAMETER (QCL50=0.05D0)      !log increment for cold density table
       PARAMETER (QCL51=25.D0)       !density step for solid-solid phase transition
       PARAMETER (QCL52=0.9120108D0) !log decrement for cold compression curve
@@ -532,6 +532,9 @@ c
       WRITE(KLST,1480)  !skip a line
       I1=IZ
       I2=DIN(28)        !number of elements in material
+CSTS
+      WRITE(KLST,1521) DIN(27),DIN(29)
+CSTS
 c
 c    write DIN(28) lines in output file summarizing element abundances
 c
@@ -667,6 +670,13 @@ C
       IF(UI(42).EQ.ONE) ACK(IT+82)=ONE
 C
 CHJM
+CSTS
+C     Transfer heat capacity adjustment parameter, +88 slot not used, STS 20190719
+      ACK(IT+88)=UI(44) !FCV
+      ACK(IT+89)=UI(45) !QCC1 - low density cutoff for solid terms
+      ACK(IT+90)=UI(46) !QCC6 - psi value at switch to pure gas treatment
+      WRITE(KLST,1580) ACK(IT+88),ACK(IT+89),ACK(IT+90)
+CSTS
       IKK=0                              !loop counter for B00, P0 iteration
       GAM=DIN(15)+TGAM/THREE             !DIN(15) is reference gamma, eq 3.15
       IF (NINT(DIN(30)).EQ.2) GO TO 410  !gas only with electronic terms, skip to later
@@ -675,7 +685,7 @@ C
 C      compute and check coefficients for computation of gamma in expanded states
 C
         S3=ACK(IT+61)+ONE  !C61 = interpolation paramter, usually 0
-        DIN(14)=DIN(25)    !constant C14 in equation 4.26  DIN(25) = theta0
+        DIN(14)=DIN(25)    !constant C14 in equation 4.26  DIN(25) = theta0 in eV units
      &         *EXP(QCL8*S3-(TWO-HALF*ACK(IT+60))*DIN(15))/DIN(11)**S3
         DIN(16)=(S3-(TWO-ACK(IT+60))*DIN(15))/DIN(11)**2    !C16 in eq. 4.24
         DIN(17)=((THREE-ACK(IT+60))*DIN(15)-TWO*S3)/DIN(11) !C17 in eq. 4.24
@@ -712,7 +722,7 @@ C  contrained to be continuous at eta = 1 (even SLT did not *require* this!).
 C
 C  This modification has little affect on the high pressure and temperature
 C  behavior of the code, but it does improve the code's behavior near the
-C  reference pressue and temperature 
+C  reference pressure and temperature 
 C
 C
       IF(ACK(IT+82).EQ.ONE) GO TO 555    !jump to special evaluation for Mie potential
@@ -1495,10 +1505,12 @@ C     SOLID (TYPE -1)
       IF(DIN(33).GT.ZERO) THEN
         SPS=DIN(33)-0.99
         IF(SPS.GT.ZERO) THEN
-          RHUGMX=DIN(11)*DIN(33)/SPS
+C         STSM expand RHUGMX by 1.2
+          RHUGMX=DIN(11)*DIN(33)/SPS*1.2D0
         END IF
       ELSE
-          RHUGMX=MIN(ACK(IT+37),FIVE*ACK(IT+11))
+C         STSM expand RHUGMX by 1.2
+          RHUGMX=MIN(ACK(IT+37),FIVE*ACK(IT+11))*1.2D0
       END IF
       GO TO 8790
  8810 CONTINUE
@@ -2245,6 +2257,9 @@ C
  1510 FORMAT (3(4H  C(,I2,3H) =,1PD16.9))
  1520 FORMAT ('  Z(',I2,')=',F4.0,'  number fraction(',I2,')='
      1 ,1PD12.5,'  atoms/gram(',I2,')=',D12.5)
+CSTS
+ 1521 FORMAT ('  N0=',D12.5,' Mean atomic weight=',D12.5)
+CSTS
  1530 FORMAT(//,'  REFERENCE POINT CONDITIONS',//,
      1'  T=',1PD15.6,6X,'RHO=',D16.6 ,6X,'P=' ,D15.6,/,
      2'  E=',D15.6,  6X,'DPDT=',D15.6,6X,'CV=',D14.6,/,
@@ -2257,5 +2272,8 @@ C
      2  ' IZ=',I5,5H  IT=,I5,7H  IKPN=,I6)
  1560 FORMAT (5(F5.0,D10.3))
  1570 FORMAT(//,'  DATA ARRAY FOR MATERIAL',I4,/)
+CSTS
+ 1580 FORMAT(//,'NEW: Cv adjust, QCC1, QCC6=',D15.6,D15.6,D15.6/)
+CSTS
  2323 RETURN
       END

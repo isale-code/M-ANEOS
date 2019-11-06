@@ -4,7 +4,7 @@ AR = ar
 ARFLAGS = -cru
 LDFLAGS = 
 LIBRARY = libaneos.a
-PROGRAM = aneos
+PROGRAM = m-aneos
 PROGOBJECTS = ANEOSTEST.o EOS.o
 LIBOBJECTS = ANDATA.o \
 	ANDEBY.o \
