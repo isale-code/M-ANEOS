@@ -1,10 +1,64 @@
-# ANEOS
-ANEOS source code and input files
+# M-ANEOS
 
-This is currently a duplicate of the version of ANEOS distributed as part of the iSALE shock physics code.
+M-ANEOS is a FORTRAN77 program for the construction of thermodynamic equations of state, which extends the ANEOS computer code developed at Sandia National Laboratories (Thompson and Lauson, 1972).
+
+## A brief description of ANEOS
+
+ANEOS uses a suite of analytical approximations in different parts of thermodynamic phase space to construct an equation of state for use in shock physics calculations. The underlying analytical framework of ANEOS is an expression for the Helmholtz free energy in terms of its fundamental variables density and temperature, which is decomposed into three components: (a) a cold component, describing atomic and electronic interactions as a function of compression at absolute zero temperature; (b) a thermal component, describing the temperature-dependent parts of the interatomic forces, which vanishes at absolute zero temperature and approaches a perfect gas EOS at high pressures and low densities; and (c) an electronic component, describing ionization of electrons which becomes important at very high temperatures and low densities. This approach is advantageous because all useful thermodynamic functions can be derived from the Helmholtz free energy, and its derivatives, and similarly decomposed into separate components (cold, thermal, electronic). 
+The full suite of analytical expressions used to define the various components of the thermodynamic functions in different parts of phase space are described in the ANEOS manual (Thompson and Lauson, 1972). The original version of ANEOS includes the functionality to account for three phase transitions: solid-liquid (melting); solid/liquid-vapor (vaporization); and a single solid-solid phase transition. However, the solid-liquid and solid-solid phase transitions could not be accounted for simultaneously.
+
+## M-ANEOS: Modifications to ANEOS
+
+Melosh (2007) made significant improvements to ANEOS for the treatment of geologic materials. These improvements include the treatment of the vapor phase as composed of molecular clusters, rather than a monatomic mixture of atoms, and the use of a Mie-type potential in the expanded solid state, rather than a Morse potential. 
+
+Collins and Melosh (2014) modified the ANEOS code to allow both a single solid-solid phase transition and the melt transition to be included simultaneously. 
+
+Stewart et al. (2019) modified ANEOS to include a parameter for the adjustment of the Debye thermal model used for the solid and liquid phases. The original ANEOS code had hard-coded a Dulong-Petit limit for the thermal term in the Helmholtz free energy (Thompson and Lauson, 1972).
+
+## Citing M-ANEOS and M-ANEOS-derived Equations of State in Scientific Works
+
+To cite the M-ANEOS software we recommend including the following references:
+
+Thompson SL, Lauson HS. Improvements in the Chart D radiation-hydrodynamic CODE III: Revised analytic equation of state. Albuquerque, N. Mex., USA: Sandia National Laboratories; 1972.
+
+Melosh HJ. A hydrocode equation of state for SiO2. Meteoritics & Planetary Science 2007; 42:2079–98.
+
+Thompson SL, Lauson HS, Melosh HJ, Collins GS and Stewart, ST, M-ANEOS: A Semi-Analytical Equation of State Code, Zenodo, http://doi.org/10.5281/zenodo.3525030
+
+To cite a specific M-ANEOS-derived equation of state, we recommend citing the source of the M-ANEOS input parameters, together with the three references listed above, using a format such as:
+
+“In this work we used the forsterite equation of state (Stewart et al., 2019) constructed using M-ANEOS (Thompson and Lauson, 1972; Melosh, 2007; Thompson et al., 2019).”
+
+An exemplar for the documentation of an M-ANEOS derived equation of state is:
+
+Stewart, Sarah T., Davies, Erik J., Duncan, Megan S., Lock, Simon J., Root, Seth, Townsend, Joshua P., Kraus, Richard G., Caracas, Razvan, Jacobsen, Stein B., 2019. Equation of State Model Forsterite-ANEOS-SLVTv1.0G1: Documentation and Comparisons. doi:10.5281/zenodo.3478631
+
+## M-ANEOS Developers
+
+S. L. Thompson
+
+H. S. Lauson
+
+H. J. Melosh
+
+G. S. Collins
+
+S. T. Stewart
+
+## Installation
 
 To compile run `make` in the `src` directory. This creates library `libaneos.a` and executable `aneos`.
 
 The latter expects to find a valid ANEOS input file, with the name `ANEOS.INPUT`, in the same directory as the program.
 
 Available input files can be found in the `input` directory.
+
+## Input files
+
+quartz.input - Melosh HJ. A hydrocode equation of state for SiO2. Meteoritics & Planetary Science 2007; 42:2079–98.
+
+serpentine.input -
+
+dunite.input - G. S. Collins and H. J. Melosh, “Improvements to ANEOS
+for multiple phase transitions,” in 45th Lunar and Planetary Science
+Conference (2014) p. 2664.
