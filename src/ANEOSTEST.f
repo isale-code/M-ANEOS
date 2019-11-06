@@ -400,7 +400,7 @@ CCCCCC========================================
 CGSC Header
  9020 FORMAT(//'M-ANEOS - an extension of the ANEOS FORTRAN77 program',
      $' for the construction of thermodynamic equations of state'//
-     $'                         http://github.com/isale-code/M-ANEOS')
+     $'                         http://github.com/isale-code/M-ANEOS'//)
  9021 FORMAT(' ANEOS was developed by S. L. Thompson and H. S. Lauson',
      $' at Sandia National Laboratory.'//
      $' M-ANEOS includes modifications by',
