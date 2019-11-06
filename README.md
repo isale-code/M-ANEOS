@@ -5,6 +5,7 @@ M-ANEOS is a FORTRAN77 program for the construction of thermodynamic equations o
 ## A brief description of ANEOS
 
 ANEOS uses a suite of analytical approximations in different parts of thermodynamic phase space to construct an equation of state for use in shock physics calculations. The underlying analytical framework of ANEOS is an expression for the Helmholtz free energy in terms of its fundamental variables density and temperature, which is decomposed into three components: (a) a cold component, describing atomic and electronic interactions as a function of compression at absolute zero temperature; (b) a thermal component, describing the temperature-dependent parts of the interatomic forces, which vanishes at absolute zero temperature and approaches a perfect gas EOS at high pressures and low densities; and (c) an electronic component, describing ionization of electrons which becomes important at very high temperatures and low densities. This approach is advantageous because all useful thermodynamic functions can be derived from the Helmholtz free energy, and its derivatives, and similarly decomposed into separate components (cold, thermal, electronic). 
+
 The full suite of analytical expressions used to define the various components of the thermodynamic functions in different parts of phase space are described in the ANEOS manual (Thompson and Lauson, 1972). The original version of ANEOS includes the functionality to account for three phase transitions: solid-liquid (melting); solid/liquid-vapor (vaporization); and a single solid-solid phase transition. However, the solid-liquid and solid-solid phase transitions could not be accounted for simultaneously.
 
 ## M-ANEOS: Modifications to ANEOS
@@ -45,20 +46,22 @@ G. S. Collins
 
 S. T. Stewart
 
-## Installation
+## Installation and usage
 
-To compile run `make` in the `src` directory. This creates library `libaneos.a` and executable `aneos`.
+M-ANEOS is provided with a very bare-bones makefile, which should be modified for your fortran compiler.
 
-The latter expects to find a valid ANEOS input file, with the name `ANEOS.INPUT`, in the same directory as the program.
+To compile run `make` in the `src` directory. This creates library `libaneos.a` and executable `m-aneos`.
+
+To run without generating a output table, invoke `m-aneos --no_table` in a directory containing a correctly formatted ANEOS input file with the name `ANEOS.INPUT`. This will produce the standard ANEOS output file `ANEOS.OUTPUT`.
+
+Simple usage instructions are printed with `m-aneos --help`.
 
 Available input files can be found in the `input` directory.
 
 ## Input files
 
-quartz.input - Melosh HJ. A hydrocode equation of state for SiO2. Meteoritics & Planetary Science 2007; 42:2079–98.
+quartz.input - Melosh H. J. (2007) A hydrocode equation of state for SiO2. Meteoritics & Planetary Science, 42:2079–98.
 
-serpentine.input -
+serpentine.input - Brookshaw, L. (1998) An Equation of State for Serpentine, Tech. Rep. Working Paper Series SC-MC-9813 (Queensland: Faculty of Sciences, University of Southern Queensland)
 
-dunite.input - G. S. Collins and H. J. Melosh, “Improvements to ANEOS
-for multiple phase transitions,” in 45th Lunar and Planetary Science
-Conference (2014) p. 2664.
+dunite.input - Collins G. S. and Melosh H. J. (2014) "Improvements to ANEOS for multiple phase transitions," in 45th Lunar and Planetary Science Conference, p. 2664.
