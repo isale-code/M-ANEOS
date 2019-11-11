@@ -56,11 +56,11 @@ The command `make install` will install `m-aneos` in the example directory, in a
 
 To run the example, change in to the `example/` directory and invoke `./m-aneos`. This will use the example `ANEOS.INPUT` file and the provided `tablegrid.txt` file to produce SESAME tables in two different formats, as well as the standard ANEOS output file `ANEOS.OUTPUT`.
 
-To run M-ANEOS without without generating an output table, invoke `./m-aneos --no_table`. This will just produce the standard ANEOS output file `ANEOS.OUTPUT`.
+To run M-ANEOS without generating an output table, invoke `./m-aneos --no_table`. This will produce the standard ANEOS output file `ANEOS.OUTPUT` only.
 
-Simple usage instructions are printed with `m-aneos --help`.
+Simple usage instructions are printed with `./m-aneos --help`.
 
-Available input files can be found in the `input` directory.
+Available input files can be found in the `input/` directory.
 
 ## Input files
 
