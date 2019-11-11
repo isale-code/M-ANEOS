@@ -27,7 +27,6 @@ C
       DIMENSION CSARR(2000,2000)
       DIMENSION CVARR(2000,2000)
       DIMENSION ZKARR(2000,2000)
-      INTEGER DCOUNT,TCOUNT
 C
 CSTS ADDS --help, --no_table, and file checks
       character(:), allocatable :: arg
@@ -146,10 +145,12 @@ C
       READ(13, '(E12.6)') T0REF
       READ(13, '(E12.6)') DCOUNT
       READ(13, '(E12.6)') TCOUNT
-      DO 50 I=1,DCOUNT
+      IDCOUNT = INT(DCOUNT)
+      ITCOUNT = INT(TCOUNT)
+      DO 50 I=1,IDCOUNT
       READ(13, '(E12.6)') DARR(I)
  50   CONTINUE
-      DO 51 I=1,TCOUNT
+      DO 51 I=1,ITCOUNT
       READ(13, '(E12.6)') TMP
       TARR(I) = TMP/TCONV
  51   CONTINUE
@@ -160,8 +161,8 @@ C
 C      PREF=1.D6      !REFERENCE PRESSURE =  1 ATMOSPHERE
 C      TOL=1.D-7      !PRECISION OF CONVERGENCE TO REF PRESSURE
       
-      DO 61 I=1,DCOUNT
-      DO 60 J=1,TCOUNT
+      DO 61 I=1,IDCOUNT
+      DO 60 J=1,ITCOUNT
       CALL ANEOSV (1,TARR(J),DARR(I),1,P,E,S,CV,DPDT,DPDR,FKRO,CS,KPA,
      &  R2PL,R2PH,ZBAR)
       IF (ABS(P) .GE. 1E-20) THEN
@@ -205,44 +206,44 @@ C     number of density points, number of temperature points in grid
       WRITE(14, 8251) DCOUNT, TCOUNT
       STYLE=2
 C     density array g/cm3
-      DO 70 K=1, DCOUNT
+      DO 70 K=1, IDCOUNT
       WRITE(14,8250) DARR(K)
       STYLE=STYLE+1
       IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
  70   CONTINUE
 C     temperature array eV to K
-      DO 71 J=1, TCOUNT
+      DO 71 J=1, ITCOUNT
       WRITE(14,8250) TARR(J)*TCONV
       STYLE=STYLE+1
       IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
  71   CONTINUE
 C     specific entropy in ergs/eV/g to MJ/K/kg
-      DO 78 J=1, TCOUNT
-      DO 79 K=1, DCOUNT
+      DO 78 J=1, ITCOUNT
+      DO 79 K=1, IDCOUNT
       WRITE(14,8250) SARR(K,J)*(1.D-10/TCONV)
       STYLE=STYLE+1
       IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
  79   CONTINUE
  78   CONTINUE
 C     sound speed in cm/s
-      DO 80 J=1, TCOUNT
-      DO 81 K=1, DCOUNT
+      DO 80 J=1, ITCOUNT
+      DO 81 K=1, IDCOUNT
       WRITE(14,8250) CSARR(K,J)
       STYLE=STYLE+1
       IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
  81   CONTINUE
  80   CONTINUE
 C     specific heat capacity in erg/eV/g to MJ/kg/K
-      DO 82 J=1, TCOUNT
-      DO 83 K=1, DCOUNT
+      DO 82 J=1, ITCOUNT
+      DO 83 K=1, IDCOUNT
       WRITE(14,8250) CVARR(K,J)*(1.D-10/TCONV)
       STYLE=STYLE+1
       IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
  83   CONTINUE
  82   CONTINUE
 C     KPA FLAG
-      DO 84 J=1, TCOUNT
-      DO 85 K=1, DCOUNT
+      DO 84 J=1, ITCOUNT
+      DO 85 K=1, IDCOUNT
       WRITE(14,8250) ZKARR(K,J)
       STYLE=STYLE+1
       IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
@@ -279,20 +280,20 @@ C     number of density points, number of temperature points in grid
       WRITE(14, 8251) DCOUNT, TCOUNT
       STYLE=2
 C     density array g/cm3
-      DO 100 K=1, DCOUNT
+      DO 100 K=1, IDCOUNT
       WRITE(14,8250) DARR(K)
       STYLE=STYLE+1
       IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
 100   CONTINUE
 C     temperature array eV to K
-      DO 101 J=1, TCOUNT
+      DO 101 J=1, ITCOUNT
       WRITE(14,8250) TARR(J)*TCONV
       STYLE=STYLE+1
       IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
 101   CONTINUE
 C     pressure array dynes/cm2 to GPa
-      DO 102 J=1, TCOUNT
-      DO 103 K=1, DCOUNT
+      DO 102 J=1, ITCOUNT
+      DO 103 K=1, IDCOUNT
 C      IF (PARR(K,J) .LT. 1.D-20 .AND. PARR(K,J) .GT. 0.) 
 C     &    PARR(K,J)=1.D-20
       WRITE(14,8250) PARR(K,J)*1.D-10
@@ -301,16 +302,16 @@ C     &    PARR(K,J)=1.D-20
 103   CONTINUE
 102   CONTINUE
 C     specific internal energy array in ergs/g to MJ/kg
-      DO 104 J=1, TCOUNT
-      DO 105 K=1, DCOUNT
+      DO 104 J=1, ITCOUNT
+      DO 105 K=1, IDCOUNT
       WRITE(14,8250) EARR(K,J)*1.D-10
       STYLE=STYLE+1
       IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)
 105   CONTINUE
 104   CONTINUE
 C     Helmholtz free energy array in ergs/g to MJ/kg
-      DO 106 J=1, TCOUNT
-      DO 107 K=1, DCOUNT
+      DO 106 J=1, ITCOUNT
+      DO 107 K=1, IDCOUNT
       WRITE(14,8250) (EARR(K,J)-TARR(J)*SARR(K,J))*(1.D-10)
       STYLE=STYLE+1
       IF (mod(STYLE,5) .EQ. 0) WRITE(14,8200)

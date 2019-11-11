@@ -53,6 +53,10 @@ $(LIBRARY): $(LIBOBJECTS)
 $(PROGRAM): $(PROGOBJECTS) $(LIBRARY)
 	$(FC) $(FCFLAGS) -o $(PROGRAM) $(PROGOBJECTS) $(LIBRARY)
 
+install:
+	cp ../input/quartz_.input ../example/ANEOS.INPUT
+	cp ./m-aneos ../example/m-aneos
+
 clean:
 	rm -f $(LIBOBJECTS) $(PROGOBJECTS)
 
