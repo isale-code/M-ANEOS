@@ -1,6 +1,6 @@
 # M-ANEOS
 
-M-ANEOS is a FORTRAN77 program for the construction of thermodynamic equations of state, which extends the ANEOS computer code developed at Sandia National Laboratories [(Thompson and Lauson, 1972)](./docs/ANEOS_manual.pdf).
+M-ANEOS is a FORTRAN program for the construction of thermodynamic equations of state, which extends the ANEOS computer code developed at Sandia National Laboratories [(Thompson and Lauson, 1972)](./docs/ANEOS_manual.pdf).
 
 ## A brief description of ANEOS
 
@@ -34,7 +34,7 @@ An exemplar for the documentation of an M-ANEOS derived equation of state is:
 
 Stewart, Sarah T., Davies, Erik J., Duncan, Megan S., Lock, Simon J., Root, Seth, Townsend, Joshua P., Kraus, Richard G., Caracas, Razvan, Jacobsen, Stein B., 2019. Equation of State Model Forsterite-ANEOS-SLVTv1.0G1: Documentation and Comparisons. [https://doi.org/10.5281/zenodo.3478631]
 
-## M-ANEOS Developers
+## M-ANEOS Contributors
 
 S. L. Thompson
 
@@ -50,9 +50,13 @@ S. T. Stewart
 
 M-ANEOS is provided with a very bare-bones makefile, which should be modified for your fortran compiler.
 
-To compile run `make` in the `src` directory. This creates library `libaneos.a` and executable `m-aneos`.
+To compile, run `make` in the `src` directory. This creates library `libaneos.a` and executable `m-aneos`.
 
-To run without generating an output table, invoke `m-aneos --no_table` in a directory containing a correctly formatted ANEOS input file with the name `ANEOS.INPUT`. This will produce the standard ANEOS output file `ANEOS.OUTPUT`.
+The command `make install` will install `m-aneos` in the example directory, in addition to an example M-ANEOS input file for quartz (see below).
+
+To run the example, change in to the `example/` directory and invoke `./m-aneos`. This will use the example `ANEOS.INPUT` file and the provided `tablegrid.txt` file to produce SESAME tables in two different formats, as well as the standard ANEOS output file `ANEOS.OUTPUT`.
+
+To run M-ANEOS without without generating an output table, invoke `./m-aneos --no_table`. This will just produce the standard ANEOS output file `ANEOS.OUTPUT`.
 
 Simple usage instructions are printed with `m-aneos --help`.
 
