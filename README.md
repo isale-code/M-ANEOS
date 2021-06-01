@@ -1,12 +1,12 @@
 # M-ANEOS
 
-M-ANEOS is a FORTRAN program for the construction of thermodynamic equations of state, which extends the ANEOS computer code developed at Sandia National Laboratories [(Thompson and Lauson, 1972)](./docs/ANEOS_manual.pdf).
+M-ANEOS is a FORTRAN program for the construction of thermodynamic equations of state, which extends the ANEOS computer code developed at Sandia National Laboratories [(Thompson and Lauson, 1972)](./docs/Thompson-Lauson-1972-Improvements-II.pdf).
 
 ## A brief description of ANEOS
 
 ANEOS uses a suite of analytical approximations in different parts of thermodynamic phase space to construct an equation of state for use in shock physics calculations. The underlying analytical framework of ANEOS is an expression for the Helmholtz free energy in terms of its fundamental variables density and temperature, which is decomposed into three components: (a) a cold component, describing atomic and electronic interactions as a function of compression at absolute zero temperature; (b) a thermal component, describing the temperature-dependent parts of the interatomic forces, which vanishes at absolute zero temperature and approaches a perfect gas EOS at high pressures and low densities; and (c) an electronic component, describing ionization of electrons which becomes important at very high temperatures and low densities. This approach is advantageous because all useful thermodynamic functions can be derived from the Helmholtz free energy, and its derivatives, and similarly decomposed into separate components (cold, thermal, electronic). 
 
-The full suite of analytical expressions used to define the various components of the thermodynamic functions in different parts of phase space are described in the ANEOS manual [(Thompson and Lauson, 1972)](./docs/ANEOS_manual.pdf). The original version of ANEOS includes the functionality to account for three phase transitions: solid-liquid (melting); solid/liquid-vapor (vaporization); and a single solid-solid phase transition. However, the solid-liquid and solid-solid phase transitions could not be accounted for simultaneously.
+The full suite of analytical expressions used to define the various components of the thermodynamic functions in different parts of phase space are described in the ANEOS manual [(Thompson and Lauson, 1972)](./docs/Thompson-Lauson-1972-Improvements-II.pdf). The original version of ANEOS includes the functionality to account for three phase transitions: solid-liquid (melting); solid/liquid-vapor (vaporization); and a single solid-solid phase transition. However, the solid-liquid and solid-solid phase transitions could not be accounted for simultaneously.
 
 ## M-ANEOS: Modifications to ANEOS
 
@@ -20,7 +20,7 @@ The full suite of analytical expressions used to define the various components o
 
 To cite the M-ANEOS software we recommend including the following references:
 
-Thompson SL, Lauson HS. [Improvements in the Chart D radiation-hydrodynamic CODE III: Revised analytic equation of state.](./docs/ANEOS_manual.pdf) Albuquerque, N. Mex., USA: Sandia National Laboratories; 1972.
+Thompson SL, Lauson HS. [Improvements in the Chart D radiation-hydrodynamic CODE III: Revised analytic equation of state.](./docs/Thompson-Lauson-1972-Improvements-III.pdf) Albuquerque, N. Mex., USA: Sandia National Laboratories; 1972.
 
 Melosh HJ. [A hydrocode equation of state for SiO2](./docs/Melosh2007.pdf). Meteoritics & Planetary Science 2007; 42:2079–98.
 
