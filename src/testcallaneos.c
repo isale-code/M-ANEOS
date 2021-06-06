@@ -1,8 +1,8 @@
 /*
- * Generate an EOS table and compare to the result of the Fortran code.
+ * Calculate all thermodynamic variables from ANEOS.
  *
  * Author:   Christian Reinhardt
- * Created:  06.06.2021
+ * Created:  29.07.2020
  * Modified:  
  */
 #include <math.h>
@@ -11,79 +11,13 @@
 #include <assert.h>
 #include "aneos.h"
 
-#define SUCCESS 0
-#define FAIL -1
-
-int ReadTableGrid(char *chFile, int *nRho, int *nT) {
-    double sesameid;
-    double date;
-    double version;
-    double fmn;
-    double fmw;
-    double rho0;
-    double K0;
-    double T0;
-    int nRho;
-    int nT;
-    FILE *fp;
-    int iRet;
-    
-    fp = fopen(chFile, "r");
-    if (fp == NULL)
-        return FAIL;
-
-    /* Read the file. */
-    iRet = fscanf(fp, "%lf", &sesameid);
-    if (iRet != 1)
-        return FAIL;
-
-    iRet = fscanf(fp, "%lf", &date);
-    if (iRet != 1)
-        return FAIL;
-
-    iRet = fscanf(fp, "%lf", &version);
-    if (iRet != 1)
-        return FAIL;
-
-    iRet = fscanf(fp, "%lf", &fmn);
-    if (iRet != 1)
-        return FAIL;
-
-    iRet = fscanf(fp, "%lf", &fmw);
-    if (iRet != 1)
-        return FAIL;
-
-    iRet = fscanf(fp, "%lf", &rho0);
-    if (iRet != 1)
-        return FAIL;
-
-    iRet = fscanf(fp, "%lf", &K0);
-    if (iRet != 1)
-        return FAIL;
-
-    iRet = fscanf(fp, "%lf", &T0);
-    if (iRet != 1)
-        return FAIL;
-
-    iRet = fscanf(fp, "%lf", &nRho);
-    if (iRet != 1)
-        return FAIL;
- 
-    iRet = fscanf(fp, "%lf", &nT);
-    if (iRet != 1)
-        return FAIL;
-
-    iRet = fscanf(fp, "%lf", &K0);
-    if (iRet != 1)
-        return FAIL;
-}
-
 int main(int argc, char **argv) {
-    char matFilename[256] = "ANEOS.INPUT";
-    /* Variables for aneoscall(). */
     double rho;
     double T;
-    int iMat = 1;
+    int iMat;
+    char matFilename[256] = "ANEOS.INPUT";
+    // Uncomment below to use M-ANEOS
+    //char matFilename[256] = "maneos.in";
     double p;
     double u;
     double s;
@@ -96,9 +30,6 @@ int main(int argc, char **argv) {
     double rhoL;
     double rhoH;
     double ion;
-    /* EOS table. */
-    int nRho;
-    int nT;
 
     if (argc != 4) {
         fprintf(stderr, "Usage: aneoscall <rho> <T> <iMat>\n");
