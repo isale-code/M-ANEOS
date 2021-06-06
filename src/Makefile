@@ -1,11 +1,15 @@
 FC = gfortran
 FCFLAGS = -O3 
+CC = cc
+CFLAGS = -O3 -Wall
 AR = ar
 ARFLAGS = -cru
 LDFLAGS = 
 LIBRARY = libaneos.a
 PROGRAM = m-aneos
 PROGOBJECTS = ANEOSTEST.o EOS.o
+CWRAPPER = testaneoswrapper
+CWRAPPEROBJECTS = testaneoswrapper.o aneos.o ANEOSINIT.o
 LIBOBJECTS = ANDATA.o \
 	ANDEBY.o \
 	ANE2PH.o \
@@ -44,6 +48,9 @@ LIBOBJECTS = ANDATA.o \
 %.o: %.f
 	$(FC) -c $(FCFLAGS) $<
 
+%.o: %.c
+	$(CC) -c $(CFLAGS) $<
+
 default: $(PROGRAM)
 
 $(LIBRARY): $(LIBOBJECTS) 
@@ -52,6 +59,9 @@ $(LIBRARY): $(LIBOBJECTS)
 
 $(PROGRAM): $(PROGOBJECTS) $(LIBRARY)
 	$(FC) $(FCFLAGS) -o $(PROGRAM) $(PROGOBJECTS) $(LIBRARY)
+
+$(CWRAPPER): $(CWRAPPEROBJECTS) $(LIBRARY)
+	$(FC) $(FCFLAGS) -o $(CWRAPPER) $(CWRAPPEROBJECTS) $(LIBRARY)
 
 install:
 	cp ../input/quartz_.input ../example/ANEOS.INPUT
