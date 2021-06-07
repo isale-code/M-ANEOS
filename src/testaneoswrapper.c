@@ -33,41 +33,53 @@ int ReadTableGrid(char *chFile, double *rho, double *T, int *pnRho, int *pnT) {
     if (T != NULL) free(T);
 
     fp = fopen(chFile, "r");
-    if (fp == NULL) return FAIL;
+    //if (fp == NULL) return FAIL;
+    assert(fp != NULL);
 
     /* Read the file. */
     iRet = fscanf(fp, "%lf", &sesameid);
-    if (iRet != 1) return FAIL;
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
 
     iRet = fscanf(fp, "%lf", &date);
-    if (iRet != 1) return FAIL;
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
 
     iRet = fscanf(fp, "%lf", &version);
-    if (iRet != 1) return FAIL;
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
 
     iRet = fscanf(fp, "%lf", &fmn);
-    if (iRet != 1) return FAIL;
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
 
     iRet = fscanf(fp, "%lf", &fmw);
-    if (iRet != 1) return FAIL;
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
 
     iRet = fscanf(fp, "%lf", &rho0);
-    if (iRet != 1) return FAIL;
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
 
     iRet = fscanf(fp, "%lf", &K0);
-    if (iRet != 1) return FAIL;
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
 
     iRet = fscanf(fp, "%lf", &T0);
-    if (iRet != 1) return FAIL;
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
 
     iRet = fscanf(fp, "%d", &nRho);
-    if (iRet != 1) return FAIL;
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
  
     iRet = fscanf(fp, "%d", &nT);
-    if (iRet != 1) return FAIL;
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
 
     iRet = fscanf(fp, "%lf", &K0);
-    if (iRet != 1) return FAIL;
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
 
     /* Allocate memory and read rho and T. */
     rho = calloc(nRho, sizeof(double));
@@ -78,12 +90,14 @@ int ReadTableGrid(char *chFile, double *rho, double *T, int *pnRho, int *pnT) {
 
     for (i=0; i<nRho; i++) {
         iRet = fscanf(fp, "%lf", &rho[i]);
-        if (iRet != 1) return FAIL;
+        //if (iRet != 1) return FAIL;
+        assert(iRet == 1);
     }
 
     for (i=0; i<nT; i++) {
         iRet = fscanf(fp, "%lf", &T[i]);
-        if (iRet != 1) return FAIL;
+        //if (iRet != 1) return FAIL;
+        assert(iRet == 1);
     }
 
     fclose(fp);
