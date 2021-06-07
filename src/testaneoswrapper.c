@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
     int i;
 
     /* Test if reading the file tablegrid.txt works. */
-    if (!ReadTableGrid("tablegrid.txt", rhoAxis, TAxis, &nRho, &nT)) {
+    if (ReadTableGrid("tablegrid.txt", rhoAxis, TAxis, &nRho, &nT)) {
         fprintf(stderr, "Failed reading tablegrid.txt.\n");
         exit(1);
     }
