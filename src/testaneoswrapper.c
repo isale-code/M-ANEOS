@@ -107,6 +107,7 @@ int ReadTableGrid(char *chFile, double *rho, double *T, int *pnRho, int *pnT) {
     *pnRho = nRho;
     *pnT = nT;
 
+#if 0
     /* Write the data to tablegrid.new.*/
     fp = fopen("tablegrid.new", "w");
     assert(fp != NULL);
@@ -132,6 +133,7 @@ int ReadTableGrid(char *chFile, double *rho, double *T, int *pnRho, int *pnT) {
     }
 
     fclose(fp);
+#endif
     return SUCCESS;
 }
 
@@ -160,7 +162,7 @@ int main(int argc, char **argv) {
     double *TAxis;
     int i;
 
-    /* Test if reading the file tablegrid.txt works. */
+    /* Reading the file tablegrid.txt. */
     if (ReadTableGrid("tablegrid.txt", rhoAxis, TAxis, &nRho, &nT)) {
         fprintf(stderr, "Failed reading tablegrid.txt.\n");
         exit(1);
@@ -168,23 +170,10 @@ int main(int argc, char **argv) {
     
     fprintf(stderr, "nRho= %i nT= %i\n", nRho, nT);
     
-    exit(1);
-
-    if (argc != 4) {
-        fprintf(stderr, "Usage: aneoscall <rho> <T> <iMat>\n");
-        exit(1);
-    }
-
-    rho = atof(argv[1]);
-    T = atof(argv[2]);
-    iMat = atoi(argv[3]);
-
-    assert(rho > 0.0);
-    assert(T > 0.0);
-    assert(iMat >= 0);
-
-    fprintf(stderr, "ANEOS: Initializing material...\n");
+    fprintf(stderr, "ANEOS: Initializing material.\n");
     initaneos(matFilename);
+    fprintf(stderr, "ANEOS: Done.\n");
+
 
     callaneos_cgs(T, rho, iMat, &p, &u, &s, &cv, &dPdT, &dPdrho, &fkros, &cs, &iPhase, &rhoL, &rhoH,
                   &ion);
