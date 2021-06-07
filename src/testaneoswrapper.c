@@ -25,6 +25,7 @@ int ReadTableGrid(char *chFile, double *rho, double *T, int *pnRho, int *pnT) {
     double T0;
     int nRho;
     int nT;
+    double tmp;
     FILE *fp;
     int iRet;
     int i;
@@ -68,14 +69,19 @@ int ReadTableGrid(char *chFile, double *rho, double *T, int *pnRho, int *pnT) {
     iRet = fscanf(fp, "%lf", &T0);
     //if (iRet != 1) return FAIL;
     assert(iRet == 1);
+    
+    iRet = fscanf(fp, "%lf", &tmp);
+    nRho = (int) tmp;
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
+    assert(nRho > 0);
 
-    iRet = fscanf(fp, "%d", &nRho);
-    //if (iRet != 1) return FAIL;
-    assert(iRet == 1);
  
-    iRet = fscanf(fp, "%d", &nT);
+    iRet = fscanf(fp, "%lf", &tmp);
+    nT = (int) tmp;
     //if (iRet != 1) return FAIL;
     assert(iRet == 1);
+    assert(nT > 0);
 
     /* Allocate memory and read rho and T. */
     rho = calloc(nRho, sizeof(double));
