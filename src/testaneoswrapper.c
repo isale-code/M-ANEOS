@@ -107,6 +107,31 @@ int ReadTableGrid(char *chFile, double *rho, double *T, int *pnRho, int *pnT) {
     *pnRho = nRho;
     *pnT = nT;
 
+    /* Write the data to tablegrid.new.*/
+    fp = fopen("tablegrid.new", "w");
+    assert(fp != NULL);
+
+    /* Write the data to the file. */
+    fprintf(fp, "%11.6e\n", sesameid);
+    fprintf(fp, "%11.6e\n", date);
+    fprintf(fp, "%11.6e\n", version);
+    fprintf(fp, "%11.6e\n", fmn);
+    fprintf(fp, "%11.6e\n", fmw);
+    fprintf(fp, "%11.6e\n", rho0);
+    fprintf(fp, "%11.6e\n", K0);
+    fprintf(fp, "%11.6e\n", T0);
+    fprintf(fp, "%11.6e\n", (double) nRho);
+    fprintf(fp, "%11.6e\n", (double) nT);
+
+    for (i=0; i<nRho; i++) {
+        fprintf(fp, "%11.6e\n", rho[i]);
+    }
+
+    for (i=0; i<nT; i++) {
+        fprintf(fp, "%11.6e\n", T[i]);
+    }
+
+    fclose(fp);
     return SUCCESS;
 }
 
