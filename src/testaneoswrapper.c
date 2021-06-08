@@ -14,6 +14,106 @@
 #define SUCCESS 0
 #define FAIL -1
 
+struct ANEOSTable {
+    int iMat;
+    double SesameId;
+    double Date;
+    double Version;
+    double fmn;
+    double fmw;
+    double rho0;
+    double K0;
+    double T0;
+    int nRho;
+    int nT;
+    double *rho;
+    double *T;
+    double *P;
+    double *u;
+    double *s;
+    double *cs;
+    double *cv;
+    int *phase;
+};
+
+/*
+ * Allocate memory and read rho and T from a file.
+ */
+struct ANEOSTable *ANEOSTableInit(char *chFile) {
+    struct ANEOSTable *Table;
+    double tmp;
+    FILE *fp;
+    int iRet;
+    int i;
+
+    Table = (struct ANEOSTable *) calloc(1, sizeof(struct ANEOSTable));
+    assert(Table != NULL);
+
+    fp = fopen(chFile, "r");
+    assert(fp != NULL);
+
+    /* Read the file. */
+    iRet = fscanf(fp, "%lf", &Table->SesameId);
+    assert(iRet == 1);
+
+    iRet = fscanf(fp, "%lf", &Table->Date);
+    assert(iRet == 1);
+
+    iRet = fscanf(fp, "%lf", &Table->Version);
+    assert(iRet == 1);
+
+    iRet = fscanf(fp, "%lf", &Table->fmn);
+    assert(iRet == 1);
+
+    iRet = fscanf(fp, "%lf", &Table->fmw);
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
+
+    iRet = fscanf(fp, "%lf", &Table->rho0);
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
+
+    iRet = fscanf(fp, "%lf", &Table->K0);
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
+
+    iRet = fscanf(fp, "%lf", &Table->T0);
+    //if (iRet != 1) return FAIL;
+    assert(iRet == 1);
+    
+    iRet = fscanf(fp, "%lf", &tmp);
+    assert(iRet == 1);
+    Table->nRho = (int) tmp;
+    assert(Table->nRho > 0);
+
+ 
+    iRet = fscanf(fp, "%lf", &tmp);
+    assert(iRet == 1);
+    Table->nT = (int) tmp;
+    assert(Table->nT > 0);
+
+    /* Allocate memory and read rho and T. */
+    Table->rho = calloc(Table->nRho, sizeof(double));
+    assert(Table->rho != NULL);
+
+    Table->T = calloc(Table->nT, sizeof(double));
+    assert(Table->rho != NULL);
+
+    for (i=0; i<Table->nRho; i++) {
+        iRet = fscanf(fp, "%lf", &Table->rho[i]);
+        assert(iRet == 1);
+    }
+
+    for (i=0; i<Table->nT; i++) {
+        iRet = fscanf(fp, "%lf", &Table->T[i]);
+        assert(iRet == 1);
+    }
+
+    fclose(fp);
+
+    return Table;
+}
+
 int ReadTableGrid(char *chFile, double *rho, double *T, int *pnRho, int *pnT) {
     double sesameid;
     double date;
@@ -156,12 +256,10 @@ int main(int argc, char **argv) {
     double rhoH;
     double ion;
     /* EOS table. */
-    int nRho;
-    int nT;
-    double *rhoAxis;
-    double *TAxis;
+    struct ANEOSTable *Table;
     int i;
 
+#if 0
     /* Reading the file tablegrid.txt. */
     if (ReadTableGrid("tablegrid.txt", rhoAxis, TAxis, &nRho, &nT)) {
         fprintf(stderr, "Failed reading tablegrid.txt.\n");
@@ -169,12 +267,20 @@ int main(int argc, char **argv) {
     }
     
     fprintf(stderr, "nRho= %i nT= %i\n", nRho, nT);
-    
+#endif
+
+    /* Initialize ANEOS. */
     fprintf(stderr, "ANEOS: Initializing material.\n");
     initaneos(matFilename);
     fprintf(stderr, "ANEOS: Done.\n");
 
+    /* Generate the EOS table. */
+    Table = ANEOSTableInit("tablegrid.txt");
+    assert(Table != NULL);
 
+    fprintf(stderr, "nRho= %i nT= %i\n", Table->nRho, Table->nT);
+
+    exit(1);
     callaneos_cgs(T, rho, iMat, &p, &u, &s, &cv, &dPdT, &dPdrho, &fkros, &cs, &iPhase, &rhoL, &rhoH,
                   &ion);
 
