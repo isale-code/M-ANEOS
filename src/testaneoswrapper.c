@@ -257,6 +257,12 @@ int main(int argc, char **argv) {
     double ion;
     /* EOS table. */
     struct ANEOSTable *Table;
+    int nwds;
+    int nTables;
+    int Table1;
+    int Table2;
+    int nwds1;
+    int nwds2;
     int i;
 
 #if 0
@@ -278,7 +284,19 @@ int main(int argc, char **argv) {
     Table = ANEOSTableInit("tablegrid.txt");
     assert(Table != NULL);
 
+    fprintf(stderr, "Open input file.\n");
     fprintf(stderr, "nRho= %i nT= %i\n", Table->nRho, Table->nT);
+
+    for (i=0; i<
+
+
+    /* Write the EOS table. */
+    nwds = 9;
+    nTables = 2;
+    Table1 = 201;
+    Table2 = 301;
+    nwds1 = 5;
+    nwds2 = 2+Table->nRho+Table->nT+Table->nRho*Table->nT*3;
 
     exit(1);
     callaneos_cgs(T, rho, iMat, &p, &u, &s, &cv, &dPdT, &dPdrho, &fkros, &cs, &iPhase, &rhoL, &rhoH,
