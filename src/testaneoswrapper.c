@@ -263,6 +263,7 @@ int main(int argc, char **argv) {
     int Table2;
     int nwds1;
     int nwds2;
+    FILE *fp;
     int i;
 
 #if 0
@@ -287,16 +288,46 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Open input file.\n");
     fprintf(stderr, "nRho= %i nT= %i\n", Table->nRho, Table->nT);
 
-    for (i=0; i<
+    fprintf(stderr, "rho_min= %16.8E rho_max= %16.8E\n", Table->rho[0], Table->rho[Table->nRho-1]);
+    fprintf(stderr, "T_min= %16.8E T_max= %16.8E\n", Table->T[0], Table->T[Table->nT-1]);
 
+    /*
+     * Write the standard (short) SESAME table.
+     */
+    fp = fopen("NEW-SESAME-STD.NEW", "w");
+    assert(fp != NULL);
 
-    /* Write the EOS table. */
     nwds = 9;
     nTables = 2;
     Table1 = 201;
     Table2 = 301;
     nwds1 = 5;
     nwds2 = 2+Table->nRho+Table->nT+Table->nRho*Table->nT*3;
+
+    /* Write the header. */
+    fprintf(fp, " INDEX     MATID = %7i   NWDS = %8i\n", (int) Table->SesameId, nwds);
+    fprintf(fp, "%16.8E%16.8E%16.8E%16.8E%16.8E\n", Table->SesameId, Table->Date, Table->Date,
+                                                    Table->Version, nTables);
+    fprintf(fp, "%16.8E%16.8E%16.8E%16.8E\n", (double) Table1, (double) Table2, (double) nwds1, (double) nwds2);
+
+    /* Table 1. */
+    fprintf(fp, " RECORD     TYPE =%5i     NWDS = %8i\n", Table1, nwds1);
+    fprintf(fp, "%16.8E%16.8E%16.8E%16.8E%16.8E\n", Table->fmn, Table->fmw, Table->rho0, Table->K0,
+                                                    Table->T0);
+    /* Table 2. */
+    fprintf(fp, " RECORD     TYPE =%5i     NWDS = %8i\n", Table2, nwds2);
+
+    /* Number of grid points in rho and T. */
+    fprintf(fp, "%16.8E%16.8E", (double) Table->nRho, (double) Table->nT);
+
+    /* Print rho and T axis. */
+    fprintf(fp, "%16.8E%16.8E%16.8E\n", Table->rho[0], Table->rho[1], Table->rho[2]);
+
+    for (i=3; i<Table->nRho; i++) {
+        fprintf(fp, "%16.8E", Table->rho[i]);
+        /* Print a new line after every 5 grid points. */
+        if (((i + 3) % 5) == 0) fprintf(fp, "\n");
+    }
 
     exit(1);
     callaneos_cgs(T, rho, iMat, &p, &u, &s, &cv, &dPdT, &dPdrho, &fkros, &cs, &iPhase, &rhoL, &rhoH,
