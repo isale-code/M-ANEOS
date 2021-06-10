@@ -263,6 +263,7 @@ int main(int argc, char **argv) {
     int Table2;
     int nwds1;
     int nwds2;
+    int nValues;
     FILE *fp;
     int i;
 
@@ -321,12 +322,22 @@ int main(int argc, char **argv) {
     fprintf(fp, "%16.8E%16.8E", (double) Table->nRho, (double) Table->nT);
 
     /* Print rho and T axis. */
-    fprintf(fp, "%16.8E%16.8E%16.8E\n", Table->rho[0], Table->rho[1], Table->rho[2]);
+    nValues = 2;
 
-    for (i=3; i<Table->nRho; i++) {
+    for (i=0; i<Table->nRho; i++) {
         fprintf(fp, "%16.8E", Table->rho[i]);
+        nValues++;
+
         /* Print a new line after every 5 grid points. */
-        if (((i + 3) % 5) == 0) fprintf(fp, "\n");
+        if ((nValues % 5) == 0) fprintf(fp, "\n");
+    }
+
+    for (i=0; i<Table->nT; i++) {
+        fprintf(fp, "%16.8E", Table->T[i]);
+        nValues++;
+
+        /* Print a new line after every 5 grid points. */
+        if ((nValues % 5) == 0) fprintf(fp, "\n");
     }
 
     exit(1);
