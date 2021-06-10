@@ -28,12 +28,12 @@ struct ANEOSTable {
     int nT;
     double *rho;
     double *T;
-    double *P;
-    double *u;
-    double *s;
-    double *cs;
-    double *cv;
-    int *phase;
+    double **P;
+    double **u;
+    double **s;
+    double **cs;
+    double **cv;
+    int **phase;
 };
 
 /*
@@ -110,6 +110,23 @@ struct ANEOSTable *ANEOSTableInit(char *chFile) {
     }
 
     fclose(fp);
+
+    /* Allocate memory for p, u, s, cs and cv. */
+    Table->P = (double **) calloc(Table->nRho, sizeof(double *));
+    Table->u = (double **) calloc(Table->nRho, sizeof(double *));
+    Table->s = (double **) calloc(Table->nRho, sizeof(double *));
+    Table->cs = (double **) calloc(Table->nRho, sizeof(double *));
+    Table->cv = (double **) calloc(Table->nRho, sizeof(double *));
+    Table->phase = (int **) calloc(Table->nRho, sizeof(int *));
+
+    for (i=0; i<Table->nRho; i++) {
+        Table->P[i] = (double *) calloc(Table->nT, sizeof(double));
+        Table->u[i] = (double *) calloc(Table->nT, sizeof(double));
+        Table->s[i] = (double *) calloc(Table->nT, sizeof(double));
+        Table->cs[i] = (double *) calloc(Table->nT, sizeof(double));
+        Table->cv[i] = (double *) calloc(Table->nT, sizeof(double));
+        Table->phase[i] = (int *) calloc(Table->nT, sizeof(int));
+    }
 
     return Table;
 }
@@ -265,7 +282,7 @@ int main(int argc, char **argv) {
     int nwds2;
     int nValues;
     FILE *fp;
-    int i;
+    int i, j;
 
 #if 0
     /* Reading the file tablegrid.txt. */
@@ -282,7 +299,9 @@ int main(int argc, char **argv) {
     initaneos(matFilename);
     fprintf(stderr, "ANEOS: Done.\n");
 
-    /* Generate the EOS table. */
+    /*
+     * Generate the EOS table.
+     */
     Table = ANEOSTableInit("tablegrid.txt");
     assert(Table != NULL);
 
@@ -291,6 +310,32 @@ int main(int argc, char **argv) {
 
     fprintf(stderr, "rho_min= %16.8E rho_max= %16.8E\n", Table->rho[0], Table->rho[Table->nRho-1]);
     fprintf(stderr, "T_min= %16.8E T_max= %16.8E\n", Table->T[0], Table->T[Table->nT-1]);
+    
+    for (i=0; i<Table->nRho; i++) {
+        for (j=0; j<Table->nT; j++) {
+            rho = Table->rho[i];
+            T = Table->T[j];
+
+            callaneos_cgs(T, rho, iMat, &p, &u, &s, &cv, &dPdT, &dPdrho, &fkros, &cs, &iPhase, &rhoL,
+                          &rhoH, &ion);
+
+            /* Limit the pressure. */
+            if (fabs(p) < 1e-20) p = 1e-20;
+
+            /* Convert specific entropy from ergs/g/K to MJ/kg/K. */
+            s *= 1e-10;
+
+            /* Convert specific heat capacity from erg/g/K to MJ/kg/K. */
+            cv *= 1e-10;
+
+            Table->P[i][j] = p;
+            Table->u[i][j] = u;
+            Table->s[i][j] = s;
+            Table->cs[i][j] = cs;
+            Table->cv[i][j] = cv;
+            Table->phase[i][j] = iPhase;
+        }
+    }
 
     /*
      * Write the standard (short) SESAME table.
@@ -324,6 +369,7 @@ int main(int argc, char **argv) {
     /* Print rho and T axis. */
     nValues = 2;
 
+    /* Density */
     for (i=0; i<Table->nRho; i++) {
         fprintf(fp, "%16.8E", Table->rho[i]);
         nValues++;
@@ -331,14 +377,15 @@ int main(int argc, char **argv) {
         /* Print a new line after every 5 grid points. */
         if ((nValues % 5) == 0) fprintf(fp, "\n");
     }
-
+    
+    /* Temperature */
     for (i=0; i<Table->nT; i++) {
         fprintf(fp, "%16.8E", Table->T[i]);
         nValues++;
 
-        /* Print a new line after every 5 grid points. */
         if ((nValues % 5) == 0) fprintf(fp, "\n");
     }
+
 
     exit(1);
     callaneos_cgs(T, rho, iMat, &p, &u, &s, &cv, &dPdT, &dPdrho, &fkros, &cs, &iPhase, &rhoL, &rhoH,
