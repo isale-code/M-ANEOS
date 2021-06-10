@@ -322,6 +322,12 @@ int main(int argc, char **argv) {
             /* Limit the pressure. */
             if (fabs(p) < 1e-20) p = 1e-20;
 
+            /* Convert pressure from cgs to GPa. */
+            p *= 1e-10;
+
+            /* Convert specific internal energy from erg/g to MJ/kg. */
+            u *= 1e-10;
+
             /* Convert specific entropy from ergs/g/K to MJ/kg/K. */
             s *= 1e-10;
 
@@ -338,9 +344,9 @@ int main(int argc, char **argv) {
     }
 
     /*
-     * Write the standard (short) SESAME table.
+     * Write the SESAME table.
      */
-    fp = fopen("NEW-SESAME-STD.NEW", "w");
+    fp = fopen("NEW-SESAME-EXT.NEW", "w");
     assert(fp != NULL);
 
     nwds = 9;
@@ -348,12 +354,12 @@ int main(int argc, char **argv) {
     Table1 = 201;
     Table2 = 301;
     nwds1 = 5;
-    nwds2 = 2+Table->nRho+Table->nT+Table->nRho*Table->nT*3;
+    nwds2 = 2+Table->nRho+Table->nT+Table->nRho*Table->nT*4;
 
     /* Write the header. */
     fprintf(fp, " INDEX     MATID = %7i   NWDS = %8i\n", (int) Table->SesameId, nwds);
     fprintf(fp, "%16.8E%16.8E%16.8E%16.8E%16.8E\n", Table->SesameId, Table->Date, Table->Date,
-                                                    Table->Version, nTables);
+                                                    Table->Version, (double) nTables);
     fprintf(fp, "%16.8E%16.8E%16.8E%16.8E\n", (double) Table1, (double) Table2, (double) nwds1, (double) nwds2);
 
     /* Table 1. */
@@ -419,13 +425,135 @@ int main(int argc, char **argv) {
     /* Phase */
     for (i=0; i<Table->nRho; i++) {
         for (j=0; j<Table->nT; j++) {
-            fprintf(fp, "%16.8E", (double) Table->phase[i][j]);
+            fprintf(fp, "%15.8E", (double) Table->phase[i][j]);
             nValues++;
 
             if ((nValues % 5) == 0) fprintf(fp, "\n");
         }
     }
+
+    fclose(fp);
+    /*
+     * Write the standard (short) SESAME table.
+     */
+    fp = fopen("NEW-SESAME-STD.NEW", "w");
+    assert(fp != NULL);
+
+    nwds = 9;
+    nTables = 2;
+    Table1 = 201;
+    Table2 = 301;
+    nwds1 = 5;
+    nwds2 = 2+Table->nRho+Table->nT+Table->nRho*Table->nT*3;
+
+    /* Write the header. */
+    fprintf(fp, " INDEX     MATID = %7i   NWDS = %8i\n", (int) Table->SesameId, nwds);
+    fprintf(fp, "%16.8E%16.8E%16.8E%16.8E%16.8E\n", Table->SesameId, Table->Date, Table->Date,
+                                                    Table->Version, (double) nTables);
+    fprintf(fp, "%16.8E%16.8E%16.8E%16.8E\n", (double) Table1, (double) Table2, (double) nwds1, (double) nwds2);
+
+    /* Table 1. */
+    fprintf(fp, " RECORD     TYPE =%5i     NWDS = %8i\n", Table1, nwds1);
+    fprintf(fp, "%16.8E%16.8E%16.8E%16.8E%16.8E\n", Table->fmn, Table->fmw, Table->rho0, Table->K0,
+                                                    Table->T0);
+    /* Table 2. */
+    fprintf(fp, " RECORD     TYPE =%5i     NWDS = %8i\n", Table2, nwds2);
+
+    /* Number of grid points in rho and T. */
+    fprintf(fp, "%16.8E%16.8E", (double) Table->nRho, (double) Table->nT);
+
+    /* Print rho and T axis. */
+    nValues = 2;
+
+    /* Density */
+    for (i=0; i<Table->nRho; i++) {
+        fprintf(fp, "%16.8E", Table->rho[i]);
+        nValues++;
+
+        /* Print a new line after every 5 grid points. */
+        if ((nValues % 5) == 0) fprintf(fp, "\n");
+    }
     
+    /* Temperature */
+    for (i=0; i<Table->nT; i++) {
+        fprintf(fp, "%16.8E", Table->T[i]);
+        nValues++;
+
+        if ((nValues % 5) == 0) fprintf(fp, "\n");
+    }
+
+    /* Pressure */
+    for (i=0; i<Table->nRho; i++) {
+        for (j=0; j<Table->nT; j++) {
+            fprintf(fp, "%16.8E", Table->P[i][j]);
+            nValues++;
+
+            if ((nValues % 5) == 0) fprintf(fp, "\n");
+        }
+    }
+
+    /* Specific internal energy */
+    for (i=0; i<Table->nRho; i++) {
+        for (j=0; j<Table->nT; j++) {
+            fprintf(fp, "%16.8E", Table->u[i][j]);
+            nValues++;
+
+            if ((nValues % 5) == 0) fprintf(fp, "\n");
+        }
+    }
+
+    /* Helmholtz free energy */
+    for (i=0; i<Table->nRho; i++) {
+        for (j=0; j<Table->nT; j++) {
+            fprintf(fp, "%16.8E", Table->u[i][j]-Table->T[j]*Table->s[i][j]);
+            nValues++;
+
+            if ((nValues % 5) == 0) fprintf(fp, "\n");
+        }
+    }
+
+#if 0
+    /* Specific entropy */
+    for (i=0; i<Table->nRho; i++) {
+        for (j=0; j<Table->nT; j++) {
+            fprintf(fp, "%16.8E", Table->s[i][j]);
+            nValues++;
+
+            if ((nValues % 5) == 0) fprintf(fp, "\n");
+        }
+    }
+
+    /* Sound speed */
+    for (i=0; i<Table->nRho; i++) {
+        for (j=0; j<Table->nT; j++) {
+            fprintf(fp, "%16.8E", Table->cs[i][j]);
+            nValues++;
+
+            if ((nValues % 5) == 0) fprintf(fp, "\n");
+        }
+    }
+
+    /* Specific heat capacity */
+    for (i=0; i<Table->nRho; i++) {
+        for (j=0; j<Table->nT; j++) {
+            fprintf(fp, "%16.8E", Table->cv[i][j]);
+            nValues++;
+
+            if ((nValues % 5) == 0) fprintf(fp, "\n");
+        }
+    }
+
+    /* Phase */
+    for (i=0; i<Table->nRho; i++) {
+        for (j=0; j<Table->nT; j++) {
+            fprintf(fp, "%15.8E", (double) Table->phase[i][j]);
+            nValues++;
+
+            if ((nValues % 5) == 0) fprintf(fp, "\n");
+        }
+    }
+#endif
+
     fclose(fp);
 
     exit(1);
