@@ -386,6 +386,47 @@ int main(int argc, char **argv) {
         if ((nValues % 5) == 0) fprintf(fp, "\n");
     }
 
+    /* Specific entropy */
+    for (i=0; i<Table->nRho; i++) {
+        for (j=0; j<Table->nT; j++) {
+            fprintf(fp, "%16.8E", Table->s[i][j]);
+            nValues++;
+
+            if ((nValues % 5) == 0) fprintf(fp, "\n");
+        }
+    }
+
+    /* Sound speed */
+    for (i=0; i<Table->nRho; i++) {
+        for (j=0; j<Table->nT; j++) {
+            fprintf(fp, "%16.8E", Table->cs[i][j]);
+            nValues++;
+
+            if ((nValues % 5) == 0) fprintf(fp, "\n");
+        }
+    }
+
+    /* Specific heat capacity */
+    for (i=0; i<Table->nRho; i++) {
+        for (j=0; j<Table->nT; j++) {
+            fprintf(fp, "%16.8E", Table->cv[i][j]);
+            nValues++;
+
+            if ((nValues % 5) == 0) fprintf(fp, "\n");
+        }
+    }
+
+    /* Phase */
+    for (i=0; i<Table->nRho; i++) {
+        for (j=0; j<Table->nT; j++) {
+            fprintf(fp, "%16.8E", (double) Table->phase[i][j]);
+            nValues++;
+
+            if ((nValues % 5) == 0) fprintf(fp, "\n");
+        }
+    }
+    
+    fclose(fp);
 
     exit(1);
     callaneos_cgs(T, rho, iMat, &p, &u, &s, &cv, &dPdT, &dPdrho, &fkros, &cs, &iPhase, &rhoL, &rhoH,
