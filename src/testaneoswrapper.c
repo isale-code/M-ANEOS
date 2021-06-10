@@ -357,7 +357,7 @@ int main(int argc, char **argv) {
     nwds2 = 2+Table->nRho+Table->nT+Table->nRho*Table->nT*4;
 
     /* Write the header. */
-    fprintf(fp, " INDEX     MATID = %7i   NWDS = %8i\n", (int) Table->SesameId, nwds);
+    fprintf(fp, " INDEX     MATID =%7i   NWDS = %8i\n", (int) Table->SesameId, nwds);
     fprintf(fp, "%16.8E%16.8E%16.8E%16.8E%16.8E\n", Table->SesameId, Table->Date, Table->Date,
                                                     Table->Version, (double) nTables);
     fprintf(fp, "%16.8E%16.8E%16.8E%16.8E\n", (double) Table1, (double) Table2, (double) nwds1, (double) nwds2);
