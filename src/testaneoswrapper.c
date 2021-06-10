@@ -282,6 +282,8 @@ int main(int argc, char **argv) {
     int nwds2;
     int nValues;
     FILE *fp;
+    /* Convert from eV to K. */
+    double Tconv = 1.16045e4;
     int i, j;
 
 #if 0
@@ -310,7 +312,8 @@ int main(int argc, char **argv) {
 
     fprintf(stderr, "rho_min= %16.8E rho_max= %16.8E\n", Table->rho[0], Table->rho[Table->nRho-1]);
     fprintf(stderr, "T_min= %16.8E T_max= %16.8E\n", Table->T[0], Table->T[Table->nT-1]);
-    
+
+#if 0 
     for (i=0; i<Table->nRho; i++) {
         for (j=0; j<Table->nT; j++) {
             rho = Table->rho[i];
@@ -342,6 +345,39 @@ int main(int argc, char **argv) {
             Table->phase[i][j] = iPhase;
         }
     }
+#endif
+
+    for (i=0; i<Table->nRho; i++) {
+        for (j=0; j<Table->nT; j++) {
+
+            callaneos_cgs(Table->T[j], Table->rho[i], iMat, &Table->P[i][j], &Table->u[i][j],
+                    &Table->s[i][j], &Table->cv[i][j], &dPdT, &dPdrho, &fkros, &cs,
+                    &Table->phase[i][j], &rhoL, &rhoH, &ion);
+
+#if 0
+            /* Convert specific entropy from ergs/g/K to MJ/kg/K. */
+            s *= 1e-10;
+            callaneos_cgs(T, rho, iMat, &p, &u, &s, &cv, &dPdT, &dPdrho, &fkros, &cs, &iPhase, &rhoL,
+                    &rhoH, &ion);
+#endif
+            /* Limit the pressure. */
+            if (fabs(p) < 1e-20) p = 1e-20;
+
+            /* Convert pressure from cgs to GPa. */
+            Table->P[i][j] *= 1e-10;
+
+            /* Convert specific internal energy from erg/g to MJ/kg. */
+            Table->u[i][j] *= 1e-10;
+
+            /* Convert specific entropy from ergs/g/K to MJ/kg/K. */
+            Table->s[i][j] *= 1e-10;
+
+            /* Convert specific heat capacity from erg/g/K to MJ/kg/K. */
+            Table->cv[i][j] *= 1e-10;
+        }
+    }
+
+
 
     /*
      * Write the SESAME table.
@@ -395,6 +431,7 @@ int main(int argc, char **argv) {
     /* Specific entropy */
     for (i=0; i<Table->nRho; i++) {
         for (j=0; j<Table->nT; j++) {
+
             fprintf(fp, "%16.8E", Table->s[i][j]);
             nValues++;
 
