@@ -313,7 +313,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "rho_min= %16.8E rho_max= %16.8E\n", Table->rho[0], Table->rho[Table->nRho-1]);
     fprintf(stderr, "T_min= %16.8E T_max= %16.8E\n", Table->T[0], Table->T[Table->nT-1]);
 
-#if 0 
+//#if 0 
     for (i=0; i<Table->nRho; i++) {
         for (j=0; j<Table->nT; j++) {
             rho = Table->rho[i];
@@ -345,9 +345,9 @@ int main(int argc, char **argv) {
             Table->phase[i][j] = iPhase;
         }
     }
-#endif
+//#endif
 
-//#if 0
+#if 0
     i = 0;
     j = 0;
 
@@ -405,7 +405,8 @@ int main(int argc, char **argv) {
     fprintf(stderr, "\n"); 
 
     exit(1);
-//#endif
+#endif
+#if 0
     for (i=0; i<Table->nRho; i++) {
         for (j=0; j<Table->nT; j++) {
 
@@ -435,7 +436,7 @@ int main(int argc, char **argv) {
             Table->cv[i][j] *= 1e-10;
         }
     }
-
+#endif
 
 
     /*
@@ -488,8 +489,8 @@ int main(int argc, char **argv) {
     }
 
     /* Specific entropy */
-    for (i=0; i<Table->nRho; i++) {
-        for (j=0; j<Table->nT; j++) {
+    for (j=0; j<Table->nT; j++) {
+        for (i=0; i<Table->nRho; i++) {
 
             fprintf(fp, "%16.8E", Table->s[i][j]);
             nValues++;
@@ -499,8 +500,8 @@ int main(int argc, char **argv) {
     }
 
     /* Sound speed */
-    for (i=0; i<Table->nRho; i++) {
-        for (j=0; j<Table->nT; j++) {
+    for (j=0; j<Table->nT; j++) {
+        for (i=0; i<Table->nRho; i++) {
             fprintf(fp, "%16.8E", Table->cs[i][j]);
             nValues++;
 
@@ -509,8 +510,8 @@ int main(int argc, char **argv) {
     }
 
     /* Specific heat capacity */
-    for (i=0; i<Table->nRho; i++) {
-        for (j=0; j<Table->nT; j++) {
+    for (j=0; j<Table->nT; j++) {
+        for (i=0; i<Table->nRho; i++) {
             fprintf(fp, "%16.8E", Table->cv[i][j]);
             nValues++;
 
@@ -519,8 +520,8 @@ int main(int argc, char **argv) {
     }
 
     /* Phase */
-    for (i=0; i<Table->nRho; i++) {
-        for (j=0; j<Table->nT; j++) {
+    for (j=0; j<Table->nT; j++) {
+        for (i=0; i<Table->nRho; i++) {
             fprintf(fp, "%15.8E", (double) Table->phase[i][j]);
             nValues++;
 
@@ -569,7 +570,7 @@ int main(int argc, char **argv) {
         /* Print a new line after every 5 grid points. */
         if ((nValues % 5) == 0) fprintf(fp, "\n");
     }
-    
+
     /* Temperature */
     for (i=0; i<Table->nT; i++) {
         fprintf(fp, "%16.8E", Table->T[i]);
@@ -579,8 +580,8 @@ int main(int argc, char **argv) {
     }
 
     /* Pressure */
-    for (i=0; i<Table->nRho; i++) {
-        for (j=0; j<Table->nT; j++) {
+    for (j=0; j<Table->nT; j++) {
+        for (i=0; i<Table->nRho; i++) {
             fprintf(fp, "%16.8E", Table->P[i][j]);
             nValues++;
 
@@ -589,8 +590,9 @@ int main(int argc, char **argv) {
     }
 
     /* Specific internal energy */
-    for (i=0; i<Table->nRho; i++) {
-        for (j=0; j<Table->nT; j++) {
+
+    for (j=0; j<Table->nT; j++) {
+        for (i=0; i<Table->nRho; i++) {
             fprintf(fp, "%16.8E", Table->u[i][j]);
             nValues++;
 
@@ -599,8 +601,9 @@ int main(int argc, char **argv) {
     }
 
     /* Helmholtz free energy */
-    for (i=0; i<Table->nRho; i++) {
-        for (j=0; j<Table->nT; j++) {
+
+    for (j=0; j<Table->nT; j++) {
+        for (i=0; i<Table->nRho; i++) {
             fprintf(fp, "%16.8E", Table->u[i][j]-Table->T[j]*Table->s[i][j]);
             nValues++;
 
