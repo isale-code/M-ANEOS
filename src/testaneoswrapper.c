@@ -347,27 +347,63 @@ int main(int argc, char **argv) {
     }
 #endif
 
-#if 0
+//#if 0
     i = 0;
     j = 0;
 
     fprintf(stderr, "i= %i, j= %i, T= %16.8E K = %16.8E eV, rho= %16.8E\n", i, j, Table->T[j],
             Table->T[j]/Tconv, Table->rho[i]);
 
+    /* Call ANEOS in the usual units. */
+    fprintf(stderr, "Call ANEOS: T= %16.8E eV, rho= %16.8E\n", Table->T[j]/Tconv, Table->rho[i]);
+
     callaneos(Table->T[j]/Tconv, Table->rho[i], iMat, &p, &u, &s, &cv, &dPdT, &dPdrho, &fkros, &cs,
                   &iPhase, &rhoL, &rhoH, &ion);
     
-    fprintf(stderr, "P = %16.8E\n", p);
-    fprintf(stderr, "u = %16.8E\n", u);
-    fprintf(stderr, "s = %16.8E\n", s);
-    fprintf(stderr, "cs = %16.8E\n", cs);
-    fprintf(stderr, "cv = %16.8E\n", cv);
+    fprintf(stderr, "ANEOS units: cgs and eV\n");
+    fprintf(stderr, "P = %16.8E [erg/cc]\n", p);
+    fprintf(stderr, "u = %16.8E [erg/g]\n", u);
+    fprintf(stderr, "s = %16.8E [erg/g/eV] \n", s);
+    fprintf(stderr, "cs = %16.8E [cm/s]\n", cs);
+    fprintf(stderr, "cv = %16.8E [erg/g/eV]\n", cv);
     fprintf(stderr, "phase = %i\n", iPhase);
-   
+    fprintf(stderr, "\n"); 
 
+    /* Call ANEOS in cgs and K. */
+    fprintf(stderr, "Call ANEOS: T= %16.8E K, rho= %16.8E\n", Table->T[j], Table->rho[i]);
+    
+    callaneos_cgs(Table->T[j], Table->rho[i], iMat, &p, &u, &s, &cv, &dPdT, &dPdrho, &fkros, &cs,
+                  &iPhase, &rhoL, &rhoH, &ion);
+      
+    fprintf(stderr, "ANEOS units: cgs and K\n");
+    fprintf(stderr, "P = %16.8E [erg/cc]\n", p);
+    fprintf(stderr, "u = %16.8E [erg/g]\n", u);
+    fprintf(stderr, "s = %16.8E [erg/g/K] \n", s);
+    fprintf(stderr, "cs = %16.8E [cm/s]\n", cs);
+    fprintf(stderr, "cv = %16.8E [erg/g/K]\n", cv);
+    fprintf(stderr, "phase = %i\n", iPhase);
+    fprintf(stderr, "\n"); 
+
+    /* Convert pressure from cgs to GPa. */
+    p *= 1e-10;
+    /* Convert specific internal energy from erg/g to MJ/kg. */
+    u *= 1e-10;
+    /* Convert specific entropy from ergs/g/K to MJ/kg/K. */
+    s *= 1e-10;
+    /* Convert specific heat capacity from erg/g/K to MJ/kg/K. */
+    cv *= 1e-10;
+
+    fprintf(stderr, "ANEOS units: SESAME table\n");
+    fprintf(stderr, "P = %16.8E [GPa]\n", p);
+    fprintf(stderr, "u = %16.8E [MJ/kg]\n", u);
+    fprintf(stderr, "s = %16.8E [MJ/kg/K] \n", s);
+    fprintf(stderr, "cs = %16.8E [cm/s]\n", cs);
+    fprintf(stderr, "cv = %16.8E [MJ/kg/K]\n", cv);
+    fprintf(stderr, "phase = %i\n", iPhase);
+    fprintf(stderr, "\n"); 
 
     exit(1);
-#endif
+//#endif
     for (i=0; i<Table->nRho; i++) {
         for (j=0; j<Table->nT; j++) {
 
