@@ -347,6 +347,27 @@ int main(int argc, char **argv) {
     }
 #endif
 
+#if 0
+    i = 0;
+    j = 0;
+
+    fprintf(stderr, "i= %i, j= %i, T= %16.8E K = %16.8E eV, rho= %16.8E\n", i, j, Table->T[j],
+            Table->T[j]/Tconv, Table->rho[i]);
+
+    callaneos(Table->T[j]/Tconv, Table->rho[i], iMat, &p, &u, &s, &cv, &dPdT, &dPdrho, &fkros, &cs,
+                  &iPhase, &rhoL, &rhoH, &ion);
+    
+    fprintf(stderr, "P = %16.8E\n", p);
+    fprintf(stderr, "u = %16.8E\n", u);
+    fprintf(stderr, "s = %16.8E\n", s);
+    fprintf(stderr, "cs = %16.8E\n", cs);
+    fprintf(stderr, "cv = %16.8E\n", cv);
+    fprintf(stderr, "phase = %i\n", iPhase);
+   
+
+
+    exit(1);
+#endif
     for (i=0; i<Table->nRho; i++) {
         for (j=0; j<Table->nT; j++) {
 
