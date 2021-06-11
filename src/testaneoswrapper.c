@@ -354,6 +354,8 @@ int main(int argc, char **argv) {
     fprintf(stderr, "i= %i, j= %i, T= %16.8E K = %16.8E eV, rho= %16.8E\n", i, j, Table->T[j],
             Table->T[j]/Tconv, Table->rho[i]);
 
+    fprintf(stderr, "T= %16.8E eV (normal), T= %16.8E eV (define) frac= %16.8E\n", Table->T[j]/Tconv, Table->T[j]/KELVIN_IN_EV, Table->T[j]/Tconv/Table->T[j]/KELVIN_IN_EV);
+
     /* Call ANEOS in the usual units. */
     fprintf(stderr, "Call ANEOS: T= %16.8E eV, rho= %16.8E\n", Table->T[j]/Tconv, Table->rho[i]);
 
