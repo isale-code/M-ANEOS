@@ -104,13 +104,14 @@ void callaneos_cgs (
 	int* kpa, double* rhoL, double* rhoH, double* ion
 ) {
     double T_in_eV;
+    const double KelvinIneV = 1.16045e4;
 	const int n = 1;
 
     // Make sure that the library was initalized.
     assert(bANEOSInitialized);
 
     // Convert from K to eV
-    T_in_eV = T/KELVIN_IN_EV;
+    T_in_eV = T/KelvinIneV;
 
 	aneosv_(
 		&n, &T_in_eV, &rho, &mat, p, u, S, cv, dpdt, dpdrho, fkros,
@@ -118,6 +119,6 @@ void callaneos_cgs (
 	);
 
     // Convert the output to K
-    *S /= KELVIN_IN_EV;
-    *cv /= KELVIN_IN_EV;
+    *S /= KelvinIneV;
+    *cv /= KelvinIneV;
 }
