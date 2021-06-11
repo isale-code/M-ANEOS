@@ -522,7 +522,7 @@ int main(int argc, char **argv) {
     /* Phase */
     for (j=0; j<Table->nT; j++) {
         for (i=0; i<Table->nRho; i++) {
-            fprintf(fp, "%15.8E", (double) Table->phase[i][j]);
+            fprintf(fp, "%16.8E", (double) Table->phase[i][j]);
             nValues++;
 
             if ((nValues % 5) == 0) fprintf(fp, "\n");
