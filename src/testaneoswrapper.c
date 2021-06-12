@@ -590,7 +590,6 @@ int main(int argc, char **argv) {
     }
 
     /* Specific internal energy */
-
     for (j=0; j<Table->nT; j++) {
         for (i=0; i<Table->nRho; i++) {
             fprintf(fp, "%16.8E", Table->u[i][j]);
@@ -601,7 +600,6 @@ int main(int argc, char **argv) {
     }
 
     /* Helmholtz free energy */
-
     for (j=0; j<Table->nT; j++) {
         for (i=0; i<Table->nRho; i++) {
             fprintf(fp, "%16.8E", Table->u[i][j]-Table->T[j]*Table->s[i][j]);
